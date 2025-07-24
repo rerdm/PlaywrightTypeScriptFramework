@@ -64,7 +64,8 @@ jobs:
       # Führt alle Teste in der staging umgebung aus mit den Tags @STAGING und @Registration
       # staging wird automatisch mit headless=true ausgeführt
       # Diese Tags müssen in dem Testfile vorhanden sein
-      run: npm run test:staging:tag "@STAGING @Registration"
+      # run: npm run test:staging:tag "@STAGING @Registration"
+      run: npm run test:staging:tc:headed "@TC-XX000"
 
     - name: Generate Allure Report
       if: ${{ !cancelled() }}

@@ -37,11 +37,14 @@ test.describe('LoginProzess', () => {
 
     username = "tester";
     password = "passwort";
-   
-    await navigate.navigateToLogin();
+
+    let stepCounter = 0;
+
+    const actualStepCounter = await navigate.navigateToLogin(stepCounter);
+    // Du kannst jetzt 'result' weiterverwenden, z.B. ausgeben oder prüfen:
 
     //successfull login
-    await loginPage.login(username,password)
+    const actualStepCounter1 = await loginPage.login(username,password,actualStepCounter);
 
     
     // rerd 2025-07-16
