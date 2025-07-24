@@ -1,0 +1,24 @@
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/allure-report/
+/allure-results/
+
+# State files for authentication
+loggedInState.json
+notLoggedInState.json
+
+# Debug files
+debug-login.js
+debug-accountbar.js
+debug-login-process.js
+test-credentials.js
+
+# Linting reports
+eslint-report.html
+eslint-reports/
+
+/archive/
+
