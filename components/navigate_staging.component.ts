@@ -23,7 +23,7 @@ class Navigate{
     constructor(page:Page){
         this.page = page;
         this.homeMenueButton = page.locator("//a[normalize-space()='Home']")
-        this.loginMenuButton = page.locator("//a[normalize-space()='Login']")
+        this.loginMenuButton = page.locator("//a[normalize-space()='LoginT']")
         this.checkBoxMenubutton = page.locator("//a[normalize-space()='Checkbox']")
         this.kontoWechselMenuButton = page.locator("//a[normalize-space()='Kontextwechsel']")
 
@@ -48,6 +48,7 @@ class Navigate{
   }  
 
    async navigateToAbout() {
+      console.log(`Action: Navigating to About Button and Clicking element: ${this.aboutMenuButton}`);
       await this.aboutMenuButton.click();
        }
 
@@ -55,8 +56,19 @@ class Navigate{
       await this.contactMenuButton.click();
      }
 
-    async navigateToLogin() {
-      await this.loginMenuButton.click();
+    async navigateToLogin(stepCount: number): Promise<number> {
+      stepCount++;
+      console.log(`Step ${stepCount}: Navigating to Login Button and Clicking element: ${this.loginMenuButton}`);
+
+      try {
+        await this.loginMenuButton.click();
+      } catch (error) {
+        console.log(`Step ${stepCount} FAILED: The Locator=${this.loginMenuButton} can not be found or is not available\n`);
+        throw error;
+      }
+      
+      
+      return stepCount;
     }
 
     async navigateToCheckbox() {

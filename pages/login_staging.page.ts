@@ -35,13 +35,27 @@ class LoginPage{
      this.header = page.locator('//header')
     }
     
-    async login(username: string,password:string) {
+    async login(username: string,password:string, stepCount: number): Promise<number> {
+
+        stepCount++;
         await this.usernameInput.fill(username)
+        console.log(`Step ${stepCount}: Fill Username value=${username} Locator=${this.usernameInput}`);
+        
+        stepCount++;
         await this.passwordInput.fill(password)
+        console.log(`Step ${stepCount}: Fill Password value=${password} Locator=${this.passwordInput}`);
+        
         await this.page.waitForTimeout(1500);
+
+        stepCount++;
         await this.submitButton.click()
-    
+        console.log(`Step ${stepCount}: Click submittt-Button Locator=${this.submitButton}`);
+        
+        return stepCount;
+
     }
+
+
 
     async verifySuccessfullLogin(){
        await expect(this.logoutButton).toBeVisible();
