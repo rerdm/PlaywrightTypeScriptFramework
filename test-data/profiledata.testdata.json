@@ -1,0 +1,26 @@
+[
+    {
+    "username":"Tester",
+    "firstname":"Toni",
+    "lastname":"Tester",
+    "email":"toni@test.er",
+    "age":"29",
+    "gender":"Divers",
+    "adress":"Am Ende 42",
+    "zipcode":"24939",
+    "city":"Dorfstadt",
+    "country":"Deutschland"
+    },
+    {
+    "username":"none",
+    "firstname":"Emelie",
+    "lastname":"Mustertest",
+    "email":"emelie@test.er",
+    "age":"45",
+    "gender":"Female",
+    "adress":"Testallee 123",
+    "zipcode":"24939",
+    "city":"Testertown",
+    "country":"Schweiz"
+    }
+]
