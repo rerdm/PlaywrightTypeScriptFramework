@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 import Navigate from '../components/navigate_staging.component';
 import LoginPage from '../pages/login_staging.page';
 import RegisterPage from '../pages/registration_staging.page';
+import { logTestStart, logTestEnd, logSeparator, logTestEndTime } from '../utils/logStep';
 
 
 test.describe('LoginProzess', () => {
@@ -20,13 +21,17 @@ test.describe('LoginProzess', () => {
     await page.context().clearCookies();
     await navigate.navigateToStartPage();
 
-    // Zeitstempel-Log am Testbeginn
-    console.log(`🕐 Test gestartet um  ${new Date().toLocaleString('de-DE')}`);
+    // Verwende logTestStart für strukturiertes Logging
+    logTestStart(test.info().title, process.env.ENVIRONMENT || 'local');
   });
 
-  test.afterEach(async ({ page }) => {
-    console.log(`🕐 Test beendet um: ${new Date().toLocaleString('de-DE')}`);
-  
+  test.afterEach(async ({ page }, testInfo) => {
+    // Übergebe Testinformationen an logTestEndTime
+    logTestEndTime(
+      testInfo.title, 
+      testInfo.status || 'unknown', 
+      testInfo.duration
+    );
   });
 
 
@@ -59,11 +64,13 @@ test.describe('LoginProzess', () => {
 
     username = "tester";
     password = ""
+    
+    let stepCounter = 0;
       
-    await navigate.navigateToLogin();
+    const actualStepCounter = await navigate.navigateToLogin(stepCounter);
 
     // Enter username and passord
-    await loginPage.login(username,password)
+    const actualStepCounter1 = await loginPage.login(username,password, actualStepCounter)
 
     // Expect that error message is available 
     await expect(loginPage.passwordWrongMsg).toBeVisible();
