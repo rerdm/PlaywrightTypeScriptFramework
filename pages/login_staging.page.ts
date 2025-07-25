@@ -30,7 +30,7 @@ class LoginPage{
 
      this.loginContainer = page.locator('#loginContainer')
 
-     this.submitButton = page.locator("//input[@id='login-submitX']"); 
+     this.submitButton = page.locator("//input[@id='login-submit']"); 
 
      this.logoutButton = page.locator("//a[normalize-space()='Logout']")
      this.header = page.locator('//header')
@@ -76,8 +76,6 @@ class LoginPage{
 
     }
 
-
-
     async verifySuccessfullLogin(){
        await expect(this.logoutButton).toBeVisible();
        await expect(this.logoutButton).toBeVisible();
@@ -85,16 +83,31 @@ class LoginPage{
 
     async verifysuccessfullLogout(){
       const navigate = new Navigate(this.page)
-      
-      // rerd 2025-07-16
-      // added try catch and logging for better error handling
-      try {
-        await expect(this.logoutButton).not.toBeVisible();
-        await expect(this.logoutButton).not.toBeVisible();
-        await expect(this.loginContainer).toBeVisible();
+
+      try{
+        try {
+            await expect(this.logoutButton).not.toBeVisible();
+        } catch (error) {
+            throw new Error(`Logout button is still visible: ${error instanceof Error ? error.message : String(error)}`);
+        }
+
+        try {
+            await expect(this.logoutButton).not.toBeVisible();
+        } catch (error) {
+            throw new Error(`Logout button is still visible (second check): ${error instanceof Error ? error.message : String(error)}`);
+        }
+
+        try {
+            await expect(this.loginContainer).toBeVisible();
+        } catch (error) {
+            throw new Error(`Login container is not visible: ${error instanceof Error ? error.message : String(error)}`);
+        }
       } catch (error) {
-        throw new Error(`Logout verification failed: ${error instanceof Error ? error.message : String(error)}`);
+        logStepError(0, 'FAILED: Logout verification failed', this.logoutButton, error instanceof Error ? error.message : String(error));
+        throw error;
       }
+
+
     }
 
 }

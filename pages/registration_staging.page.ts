@@ -78,7 +78,7 @@ generateValidPassword(password: string): string {
     await this.submitRegButton.click();
   }
 
-  async nqavigateToLogin() {
+  async navigateToLogin() {
     const navigate = new Navigate(this.page);
     try {
       await navigate.navigateToLogin();

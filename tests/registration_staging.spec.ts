@@ -68,7 +68,7 @@ test.describe('Registrierungsprozess', () => {
   });
 
   // rerd 2025-07-22 passed
-  test('Username with special characters @STAGING @Registration @TC-X0002', async () => {
+  test('Username with special characters @Registration @TC-X0002', async () => {
 
     console.log(`📝 Aktueller Test : ${test.info().title}`);
 
@@ -84,7 +84,7 @@ test.describe('Registrierungsprozess', () => {
   });
 
 
-  test('Password too short @STAGING @Registration @TC-X0003 ', async ({ page }) => {
+  test('Password too short @Registration @TC-X0003 ', async ({ page }) => {
 
     console.log(`📝 Aktueller Test : ${test.info().title}`);
 
