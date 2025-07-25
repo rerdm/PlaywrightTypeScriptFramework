@@ -52,9 +52,23 @@ test.describe('LoginProzess', () => {
     const actualStepCounter1 = await loginPage.login(username,password,actualStepCounter);
 
     
-    // rerd 2025-07-16
-    // Test is not working because DB is missing
-    //await loginPage.verifySuccessfullLogin();
+  }); 
+
+    // Test Case 1: Login with valid credentials
+  test('Successfull login @STAGING @Login @TC-XXX00', async ({ page }) => {
+
+    console.log(`📝 Aktueller Test : ${test.info().title}`);
+
+    username = "tester";
+    password = "passwort";
+
+    let stepCounter = 0;
+
+    const actualStepCounter = await navigate.navigateToLogin(stepCounter);
+    // Du kannst jetzt 'result' weiterverwenden, z.B. ausgeben oder prüfen:
+
+    //successfull login
+    const actualStepCounter1 = await loginPage.login(username,password,actualStepCounter);
 
   }); 
 
