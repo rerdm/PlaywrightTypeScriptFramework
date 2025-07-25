@@ -24,7 +24,8 @@ export default defineConfig({
   reporter: [
     ['html'], 
     ['allure-playwright', { outputFolder: 'allure-results' }], 
-    ['line']
+    ['line'],
+    ['./utils/custom-reporter.ts'] // Unser eigener Reporter für besseres Logging
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   globalSetup: require.resolve('./utils/global-setup'),

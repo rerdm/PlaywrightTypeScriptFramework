@@ -1,6 +1,7 @@
 import { el } from '@faker-js/faker/.';
 import {Page,Locator} from '@playwright/test'
 import { loadEnvironmentConfig } from '../utils/environment-config';
+import { logStep, logStepError, logStepSuccess } from '../utils/logStep';
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -23,7 +24,7 @@ class Navigate{
     constructor(page:Page){
         this.page = page;
         this.homeMenueButton = page.locator("//a[normalize-space()='Home']")
-        this.loginMenuButton = page.locator("//a[normalize-space()='LoginT']")
+        this.loginMenuButton = page.locator("//a[normalize-space()='Login']")
         this.checkBoxMenubutton = page.locator("//a[normalize-space()='Checkbox']")
         this.kontoWechselMenuButton = page.locator("//a[normalize-space()='Kontextwechsel']")
 
@@ -57,13 +58,16 @@ class Navigate{
      }
 
     async navigateToLogin(stepCount: number): Promise<number> {
+
       stepCount++;
-      console.log(`Step ${stepCount}: Navigating to Login Button and Clicking element: ${this.loginMenuButton}`);
+
+      logStep(stepCount, 'Clicking Login button', this.loginMenuButton);
 
       try {
         await this.loginMenuButton.click();
+        logStepSuccess(stepCount, 'Successfully clicked Login button', this.loginMenuButton);
       } catch (error) {
-        console.log(`Step ${stepCount} FAILED: The Locator=${this.loginMenuButton} can not be found or is not available\n`);
+        logStepError(++stepCount, 'FAILED: The Login button cannot be found or is not available', this.loginMenuButton);
         throw error;
       }
       
