@@ -1,0 +1,24 @@
+[
+  {
+    "testName": "Open Start Page @SMOKE",
+    "testSpec": "Smoke.spec.ts",
+    "environment": "staging",
+    "startTime": "5.8.2025, 16:46:24",
+    "endTime": "5.8.2025, 16:46:25",
+    "status": "PASSED",
+    "passedSteps": 1,
+    "failedSteps": 0,
+    "totalSteps": 1,
+    "steps": [
+      {
+        "stepNumber": 1,
+        "status": "PASSED",
+        "fileName": "StartPage.ts",
+        "methodName": "openUrl",
+        "timestamp": "5.8.2025, 16:46:25",
+        "details": "Successfully opened URL in openUrl",
+        "url": "https://marina-abr.github.io/StaticCoffee/index.html"
+      }
+    ]
+  }
+]

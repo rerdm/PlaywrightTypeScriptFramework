@@ -7,7 +7,7 @@ on:
 jobs:
 
   lint:
-    name: Lint Code
+    name: Lint Codecheck
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -41,10 +41,9 @@ jobs:
 
 
   test_registration:
-
+    name: Smoke Tests 
     # Job deaktiviert with if : false
 
-    # needs: lint 
     timeout-minutes: 60
     runs-on: ubuntu-latest
 
@@ -60,12 +59,12 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install
 
-    - name: npm run test:staging:tag "@STAGING @Registration"
+    - name: pm run test:staging:tc "@SMOKE"
       # Führt alle Teste in der staging umgebung aus mit den Tags @STAGING und @Registration
       # staging wird automatisch mit headless=true ausgeführt
       # Diese Tags müssen in dem Testfile vorhanden sein
       # run: npm run test:staging:tag "@STAGING @Registration"
-      run: npm run test:staging:tc "@TC-XX000"
+      run: npm run test:staging:tc "@SMOKE"
 
     - name: Generate Allure Report
       if: ${{ !cancelled() }}
@@ -97,5 +96,12 @@ jobs:
         path: allure-report/
         retention-days: 30
 
+    - name: Upload Custom HTML Test Report
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: custom-html-test-report
+        path: test-reports/
+        retention-days: 30
+        if-no-files-found: warn
 
-        

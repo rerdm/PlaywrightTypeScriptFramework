@@ -5,8 +5,8 @@ export interface EnvironmentConfig {
   environment: string;
   baseURL: string;
   headless: boolean;
-  testUsername?: string;
-  testPassword?: string;
+  Username?: string;
+  Password?: string;
   timeout?: number;
   retryCount?: number;
 }
@@ -29,7 +29,7 @@ export function loadEnvironmentConfig(env?: string): EnvironmentConfig {
   if (envConfig.error) {
     console.warn(`Warning: Could not load ${envFile}. Using default values.`);
   } else {
-    console.log(`Environment configuration loaded from ${envFile}`);
+    //console.log(`Environment configuration loaded from ${envFile}`);
   }
 
   // Get environment variables with defaults
@@ -37,6 +37,8 @@ export function loadEnvironmentConfig(env?: string): EnvironmentConfig {
     environment,
     baseURL: process.env.BASE_URL || getDefaultBaseURL(environment),
     headless: process.env.HEADLESS === 'true',
+    Username: process.env.APP_USERNAME || 'defaultUser',
+    Password: process.env.PASSWORD || 'defaultPassword',
   };
 
   //console.log(`Environment: ${config.environment}`);

@@ -19,16 +19,23 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   /* Set workers based on environment: multiple for staging, 1 for local */
   workers: envConfig.environment === 'staging' ? undefined : 1,
+  
+  /* Verlängerte Timeouts für VPN-Verbindungen */
+  timeout: 30000, // 30 Sekunden pro Test
+  expect: {
+    timeout: 10000 // 10 Sekunden für Expectations
+  },
+  
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-
   reporter: [
     ['html'], 
     ['allure-playwright', { outputFolder: 'allure-results' }], 
     ['line'],
-    ['./utils/custom-reporter.ts'] // Unser eigener Reporter für besseres Logging
+    //['./utils/custom-reporter.ts'] // Use Playwright template reporter 
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   globalSetup: require.resolve('./utils/global-setup'),
+  globalTeardown: require.resolve('./utils/global-teardown'),
   
   use: {
     /* Base URL will be set per project */
@@ -38,7 +45,8 @@ export default defineConfig({
     trace: 'retain-on-failure',
     headless: envConfig.headless,
 
-    storageState: 'loggedInState.json'
+    storageState: 'loggedInState.json',
+    
   },
 
 

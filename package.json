@@ -20,11 +20,11 @@
     "test:local:headed": "cross-env ENV=local HEADLESS=false playwright test",
     "test:staging:headed": "cross-env ENV=staging HEADLESS=false playwright test",
 
-    "test:local:tc": "cross-env ENV=local playwright test --grep",
-    "test:staging:tc": "cross-env ENV=staging playwright test --grep",
+    "test:local:tc": "cross-env ENV=local HEADLESS=true playwright test --grep",
+    "test:staging:tc": "cross-env ENV=staging HEADLESS=true playwright test --grep",
 
-    "test:local:tag": "cross-env ENV=local playwright test --grep",
-    "test:staging:tag": "cross-env ENV=staging playwright test --grep",
+    "test:local:tag": "cross-env ENV=local HEADLESS=true playwright test --grep",
+    "test:staging:tag": "cross-env ENV=staging HEADLESS=true playwright test --grep",
     
     "test:local:tc:headed": "cross-env ENV=local HEADLESS=false playwright test --grep",
     "test:staging:tc:headed": "cross-env ENV=staging HEADLESS=false playwright test --grep",
