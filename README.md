@@ -1,9 +1,5 @@
 # PlaywrightTypeScriptFramework
 Automated end-to-end testing project using Playwright and TypeScript. Tests run via GitHub Actions CI pipeline and generate detailed HTML reports. Ensures application stability by detecting issues early in development.
-# Playwright Test Automation
-
-This repository contains automated end-to-end tests with Playwright for a web application.
-
 
 ## Table of Contents
 
@@ -556,35 +552,14 @@ start test-reports/YYYY-MM-DD_HH-MM-SS_Environment.html
 Custom HTML Reports are automatically uploaded as GitHub Actions Artifacts:
 
 ```yaml
-# Login Tests with Custom Report
-test_login:
-  needs: lint
-  runs-on: ubuntu-latest
-  if: ${{ !cancelled() && (needs.lint.result == 'success' || needs.lint.result == 'skipped') }}
-  steps:
-    # ... Test execution
     - name: Upload Custom HTML Test Report
-      if: always()
+      if: ${{ !cancelled() }}
       uses: actions/upload-artifact@v4
       with:
         name: custom-html-test-report
-        path: test-reports/*.html
+        path: test-reports/
         retention-days: 30
-
-# Registration Tests with Custom Report  
-test_registration:
-  needs: lint
-  runs-on: ubuntu-latest
-  if: ${{ !cancelled() && (needs.lint.result == 'success' || needs.lint.result == 'skipped') }}
-  steps:
-    # ... Test execution
-    - name: Upload Custom HTML Test Report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: custom-html-test-report-registration
-        path: test-reports/*.html
-        retention-days: 30
+        if-no-files-found: warn
 ```
 
 **Download:** Actions → Workflow Run → "Artifacts" → "custom-html-test-report" or "custom-html-test-report-registration"
