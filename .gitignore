@@ -12,6 +12,10 @@ debug-accountbar.js
 debug-login-process.js
 test-credentials.js
 
+# Custom Reports
+test-reports/
+test-reports/*.html
+
 # Linting reports
 eslint-report.html
 eslint-reports/
