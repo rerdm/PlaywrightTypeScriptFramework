@@ -31,7 +31,7 @@ This repository contains automated end-to-end tests with Playwright for a web ap
   - [Playwright HTML Report](#playwright-html-report)
   - [ESLint HTML Report](#eslint-html-report)
   - [Allure Report](#allure-report)
-
+  - [Custom HTML Test Report](#custom-html-test-report)
 ----
 
 ## Git Rules
@@ -102,8 +102,8 @@ The project supports multiple environments through `.env` files and npm scripts 
 
 #### Available Environments
 
-- **local**   - Local tests with visible browser (HEADLESS=false) (https://marina-abr.github.io/StaticCoffee/index.html)
-- **staging** - Pipeline tests without browser (HEADLESS=true)(http://10.40.226.38/coffeeshop/index.php)
+- **local**   - Local tests with visible browser (HEADLESS=false) 
+- **staging** - Pipeline tests without browser (HEADLESS=true)
 
 **Important**: If the IP address changes (local) or the staging URL changes (different GitHub Page URL) - the envs must be adjusted.
 
@@ -117,8 +117,7 @@ The project supports multiple environments through `.env` files and npm scripts 
 
 1. Create a new `.env.XXX` file with the environment name e.g. `.env.prod` in the root directory.
 2. Fill the env file with the variables `BASE_URL` and `HEADLESS` (Only these envs are implemented so far 2025-07-23 rerd)
-3. Adjust `utils/environment-config.ts` --> Adjust the function *getDefaultBaseURL()* with the environment case and URL return
-**INFO**: Local also http://10.40.226.38/coffeeshop/index.php is used as fallback URL. 
+3. Update `utils/environment-config.ts`: In the `getDefaultBaseURL()` function, add a new `case` for your environment, specifying both the return URL and the fallback URL as needed.
 
 ## Testing
 
@@ -126,7 +125,7 @@ The project supports multiple environments through `.env` files and npm scripts 
 
 This project uses tags for grouping and filtering test cases. Each test case has a specific tag like `@TC-10001`, where the first digit represents the category and the following numbers represent the test number. Furthermore, tags like `@Login` and `@Smoke-Test` are used. Additional tags are not yet defined. The currently available tags and their assignments can be viewed at any time in the generated test documentation.
 
-[📁 To the test tags and test case overviews in the `utils/test-documentation` folder](./utils/test-documentation)
+ Folder 📁 [`utils/test-documentation`](./utils/test-documentation)
 
 ### Test Execution
 
@@ -206,7 +205,7 @@ npm run test-table
 
 #### Playwright Test Cases Overview
 
-[📁 To the `utils/test-documentation` folder](./utils/test-documentation)
+The overview of the Testcases (last run of `npm run test-tabke`) can be found in the folder 📁 [`utils/test-documentation`](./utils/test-documentation)
 
 
 #### Benefits of Test Documentation
@@ -260,7 +259,7 @@ npm run test:local registration.spec.ts
 #### Generated Files
 
 **Storage Location:** `utils/registered-users/`
-- `registered-users.csv` - CSV file with all registered users
+- `registered-users.csv` - CSV file with all registered users (new users will be attached)
 
 **CSV Format:**
 ```csv
@@ -429,15 +428,6 @@ After each pipeline run, an **interactive HTML report** is created:
 4. **Efficient Resource Usage**: Tests only run on clean code
 5. **📊 Interactive HTML Reports**: Easy analysis of code problems
 
-### Common ESLint Rules in this Project:
-
-| Rule | Severity | Description |
-|------|----------|-------------|
-| `@typescript-eslint/no-unused-vars` | Warning | Unused variables (except with `_` prefix) |
-| `@typescript-eslint/no-explicit-any` | Warning | Avoidance of `any` type |
-| `no-undef` | Error | Undefined variables |
-| `no-empty` | Error | Empty block statements |
-
 ## GitHub Actions Workflows
 
 ### Workflow Trigger (`playwright-tests.yml`):
@@ -518,6 +508,94 @@ In GitHub Actions, the Playwright report is automatically uploaded as artifact:
 
 **Download:** Actions → Workflow Run → "Artifacts" → "playwright-report"
 
+### Custom HTML Test Report
+
+**Advanced Test Reports:** The framework generates custom HTML dashboards with visual ring diagrams and detailed test metrics in addition to standard Playwright reports
+
+
+![Custom HTML Test Report Example](images/Custom-Report-Basic-v01.jpg)
+
+Draft-Version
+
+**Features:**
+- Ring diagram for test summary (Passed/Failed/Skipped)
+- Consolidated reports for multiple test specifications
+- Responsive design with Tailwind CSS
+- Collapsible test details with screenshots
+- Animation and interactive elements
+
+#### Technical Implementation:
+
+**Components:**
+- `utils/ReportManager.ts`: Persistent storage of test data across multiple specifications
+- `utils/HtmlReportGenerator.ts`: Generates the visual dashboard with SVG ring charts
+- `utils/StepLogger.ts`: Coordinates report generation
+
+**Global Setup:** Configured in `playwright.config.ts` for consolidated reports:
+```typescript
+export default defineConfig({
+  globalTeardown: require.resolve('./utils/GlobalTeardown.ts'),
+  // ... additional configuration
+});
+```
+
+#### Local Usage:
+
+```bash
+# Run tests (automatically generates Custom HTML Report)
+npm run test
+
+# Open Custom HTML Report in browser (replace timestamp and environment with actual values)
+start test-reports/YYYY-MM-DD_HH-MM-SS_Environment.html
+```
+
+**Report Storage Location:** `test-reports/YYYY-MM-DD_HH-MM-SS_Environment.html`
+
+#### CI/CD Pipeline:
+
+Custom HTML Reports are automatically uploaded as GitHub Actions Artifacts:
+
+```yaml
+# Login Tests with Custom Report
+test_login:
+  needs: lint
+  runs-on: ubuntu-latest
+  if: ${{ !cancelled() && (needs.lint.result == 'success' || needs.lint.result == 'skipped') }}
+  steps:
+    # ... Test execution
+    - name: Upload Custom HTML Test Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: custom-html-test-report
+        path: test-reports/*.html
+        retention-days: 30
+
+# Registration Tests with Custom Report  
+test_registration:
+  needs: lint
+  runs-on: ubuntu-latest
+  if: ${{ !cancelled() && (needs.lint.result == 'success' || needs.lint.result == 'skipped') }}
+  steps:
+    # ... Test execution
+    - name: Upload Custom HTML Test Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: custom-html-test-report-registration
+        path: test-reports/*.html
+        retention-days: 30
+```
+
+**Download:** Actions → Workflow Run → "Artifacts" → "custom-html-test-report" or "custom-html-test-report-registration"
+
+**Benefits:**
+- All test specifications consolidated in one report
+- Visual ring diagrams for quick overview  
+- Persistent storage as GitHub Artifacts for 30 days
+- Direct download and local viewing possible
+- Timestamped filenames with environment information for better organization
+
 ### ESLint HTML Report
 
 **Generation on Request:** HTML report for code quality analysis.
@@ -562,13 +640,11 @@ After execution, the following artifacts are automatically generated:
 
 These can be downloaded from the GitHub Actions page.
 
-### Allure Reports 
-
 ### Allure Report
 
 **Automatic Generation:** After each test run, Playwright can save results in Allure format, which are then processed into an HTML report.
 
-### Configure Allure Report
+#### Configure Allure Report
 
 To activate Allure reports, adjust the `playwright.config.ts` file and install the necessary reporter package (`allure-playwright`). Example:
 

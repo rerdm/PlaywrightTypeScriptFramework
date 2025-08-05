@@ -1,30 +1,33 @@
 import { chromium, FullConfig } from '@playwright/test';
 import { loadEnvironmentConfig } from './environment-config';
+import { StepLogger } from './StepLogger';
 
 async function globalSetup(config: FullConfig) {
-  const browser = await chromium.launch();
-  const page = await browser.newPage();
+
+  // Clear any existing reports at the start
+  StepLogger.clearReports();
+  console.log('🧹 Cleared previous test reports - ready for new test run');
 
   // Get environment configuration
   const envConfig = loadEnvironmentConfig();
   //const credentials = getEnvironmentCredentials(envConfig.environment);
 
-  console.log(`Global setup using baseURL: ${envConfig.baseURL}`);
-  console.log(`Environment: ${envConfig.environment}`);
+  //console.log(`Global setup using baseURL: ${envConfig.baseURL}`);
+  //console.log(`Environment: ${envConfig.environment}`);
 
   // Navigate to the base URL
-  await page.goto(envConfig.baseURL);
+  //await page.goto(envConfig.baseURL);
 
   // Wait until the login form is visible before saving the state
   
-  const loginLink = page.locator('//a[text()="Login"]');
-  await loginLink.waitFor({ timeout: 10000 });
+  //const loginLink = page.locator('//a[text()="Login"]');
+  //await loginLink.waitFor({ timeout: 10000 });
 
   // Save the state when the user is not logged in
-  await page.context().storageState({ path: 'notLoggedInState.json' });
+  //await page.context().storageState({ path: 'notLoggedInState.json' });
 
   // Perform login based on environment
-  await loginLink.click();
+  //await loginLink.click();
   
   // Use environment-specific credentials
   //await page.locator("//input[@id='login-username']").fill(envConfig.testUsername || 'defaultUser');
@@ -39,10 +42,10 @@ async function globalSetup(config: FullConfig) {
   
 
   // Save the state after a successful login
-  await page.context().storageState({ path: 'loggedInState.json' });
+  //await page.context().storageState({ path: 'loggedInState.json' });
 
 
-  await browser.close();
+  //await browser.close();
 
 
 }
