@@ -6,10 +6,6 @@ node_modules/
 /allure-report/
 /allure-results/
 
-# State files for authentication
-loggedInState.json
-notLoggedInState.json
-
 # Debug files
 debug-login.js
 debug-accountbar.js
