@@ -51,6 +51,8 @@ test.describe('Login Page Tests', () => {
     console.log('✅ Login tests completed');
   });
  
+
+  // teest is not working rerd 2025-08-06
   test('Open Website and Login in @REGISTRATION-001', async ({ page }) => {
 
     // This test uses fresh session without storage state

@@ -16,7 +16,8 @@ Automated end-to-end testing project using Playwright and TypeScript. Tests run 
     - [Assertion/Validation Methods](#assertionvalidation-methods)
     - [Method Parameters](#method-parameters)
   - [Development Rules](#development-rules)
-  - [For New Employees](#for-new-employees)
+  - [New Colaborators on this repo](#new-colaborators-on-this-repo)
+- [Git Rules](#git-rules) !!!!!
 - [Required Software Packages for Local Testing](#required-software-packages-for-local-testing)
 - [Environment & Test-Tag Configuration and Test Execution](#environment--test-tag-configuration-and-test-execution)
   - [Environments](#environments)
@@ -147,7 +148,7 @@ This structure ensures consistency, maintainability, and clear reporting across 
 `git checkout -b feature/branch-name` (create new branch and check out)
 3. Only work in your own branch !!
 
-## Creating Pull/Merge Request
+### Creating Pull/Merge Request
 
 4. Add files to Git <br>
 `git add <file>`<br>
@@ -177,6 +178,13 @@ The `.gitignore` file is configured to exclude files and directories that should
   - `allure-report/` - Generated Allure HTML reports
   - `allure-results/` - Raw Allure test data
   - `playwright-report/` - Playwright HTML reports
+  - `test-reports/` - Containing custom reports
+
+**Temporary Files:**
+    - `temp/` - Temporary files and intermediate data generated during test runs
+
+
+
 
 - **Dependencies & Build Artifacts:**
   - `node_modules/` - npm dependencies
