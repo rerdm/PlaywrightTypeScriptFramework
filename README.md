@@ -2,7 +2,21 @@
 Automated end-to-end testing project using Playwright and TypeScript. Tests run via GitHub Actions CI pipeline and generate detailed HTML reports. Ensures application stability by detecting issues early in development.
 
 ## Table of Contents
-
+- [Project Structure & Development Guidelines](#project-structure--development-guidelines)
+  - [Overview](#overview)
+  - [Project Structure](#project-structure)
+  - [File Organization & Storage](#file-organization--storage)
+    - [Pages Directory (`/pages/`)](#pages-directory-pages)
+    - [Specs Directory (`/specs/`)](#specs-directory-specs)
+    - [Utils Directory (`/utils/`)](#utils-directory-utils)
+  - [Naming Conventions](#naming-conventions)
+    - [Page Classes](#page-classes)
+    - [Page Variables/Locators](#page-variableslocators)
+    - [Page Methods/Functions](#page-methodsfunctions)
+    - [Assertion/Validation Methods](#assertionvalidation-methods)
+    - [Method Parameters](#method-parameters)
+  - [Development Rules](#development-rules)
+  - [For New Employees](#for-new-employees)
 - [Required Software Packages for Local Testing](#required-software-packages-for-local-testing)
 - [Environment & Test-Tag Configuration and Test Execution](#environment--test-tag-configuration-and-test-execution)
   - [Environments](#environments)
@@ -29,6 +43,100 @@ Automated end-to-end testing project using Playwright and TypeScript. Tests run 
   - [Allure Report](#allure-report)
   - [Custom HTML Test Report](#custom-html-test-report)
 ----
+
+## Project Structure & Development Guidelines
+
+### Overview
+This Playwright TypeScript framework is designed for automated testing with a page object model pattern. All test components are organized in a clear structure to ensure maintainability and scalability.
+
+### Project Structure
+```
+PlaywrightTypeScriptFramework/
+├── components/        # Includes functions shared across all pages 
+├── pages/             # Page Object Model classes
+│   ├── BasePage.ts    # Base class (DO NOT MODIFY) - inherited components
+│   └── *.Page.ts      # Individual page classes
+├── specs/             # Test specification files
+├── utils/             # Utility classes (StepLogger, etc.)
+└── tests/             # Test execution files
+```
+
+### File Organization & Storage
+
+#### Pages Directory (`/pages/`)
+- **Purpose**: Contains all Page Object Model classes
+- **Location**: Store all page classes here
+- **Naming**: `[PageName]Page.ts` (e.g., `RegistrationPage.ts`, `LoginPage.ts`)
+- **Base Class**: All pages must extend `BasePage` - **DO NOT MODIFY BasePage.ts**
+
+#### Specs Directory (`/specs/`)
+- **Purpose**: Contains test specification files
+- **Location**: Store all test specs here
+- **Naming**: `[FeatureName].spec.ts` (e.g., `registration.spec.ts`)
+
+#### Utils Directory (`/utils/`)
+- **Purpose**: Contains utility classes and helpers
+- **Key Component**: `StepLogger` class for terminal logging and HTML reporting
+
+### Naming Conventions
+
+#### Page Classes
+- **Class Name**: PascalCase ending with "Page" (e.g., `RegistrationPage`, `ProductSearchPage`)
+- **File Name**: Same as class name with `.ts` extension
+
+#### Page Variables/Locators
+- **Visibility**: Must be `private`
+- **Naming**: camelCase, descriptive (e.g., `private usernameInput`, `private submitButton`)
+
+#### Page Methods/Functions
+- **Naming**: PascalCase, self-explanatory function names
+- **Examples**: 
+  - `UsernameInputField()`
+  - `SearchInputFieldForProducts()`
+  - `ClickRegistrationButton()`
+
+#### Assertion/Validation Methods
+- **Rule**: Methods containing assertions or if statements for validation must start with "Check"
+- **Examples**:
+  - `CheckIfLogoutButtonIsNotAvailable()`
+  - `CheckUserIsLoggedIn()`
+  - `CheckProductIsDisplayed()`
+
+#### Method Parameters
+- **Standard Parameters**: All page methods should include:
+  - `stepCount: number` - for step tracking
+  - `testName: string` - for logging identification
+  - Additional parameters as needed for the specific action
+
+### Development Rules
+
+1. **BasePage**: Never modify `BasePage.ts` - it contains core functionality
+2. **StepLogger**: Always use `StepLogger` for logging - it generates both terminal output and HTML reports
+3. **Error Handling**: All methods must include proper try-catch blocks with `StepLogger.logStepFailed()`
+4. **Method Structure**: Follow the established pattern:
+   ```typescript
+   async MethodName(parameters: type, stepCount: number, testName: string): Promise<void> {
+       const methodName = this.MethodName.name;
+       try {
+           // Method logic
+           await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
+       } catch (error) {
+           // Error handling with StepLogger.logStepFailed()
+       }
+   }
+   ```
+
+### New Colaborators on this repo
+
+When adding new test components:
+
+1. **New Page Class**: Create in `/pages/` directory following naming conventions
+2. **New Test Spec**: Create in `/specs/` directory
+3. **Follow Templates**: Use existing page classes as templates for structure
+4. **Logging**: Always implement proper StepLogger integration
+5. **Validation Methods**: Remember to prefix assertion methods with "Check"
+
+This structure ensures consistency, maintainability, and clear reporting across all test automation efforts.
 
 ## Git Rules
 
