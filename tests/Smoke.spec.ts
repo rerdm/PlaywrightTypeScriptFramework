@@ -7,7 +7,6 @@ import { StepLogger } from '../utils/StepLogger';
 test.describe('Smoke Tests', () => {
 
     let startPage: StartPage;
-    let coffeshopQWebsitePath: string;
     let stepCount = 0;
     let envConfig = loadEnvironmentConfig();
     let expectedUrl = envConfig.baseURL;
@@ -16,7 +15,6 @@ test.describe('Smoke Tests', () => {
 
     test.beforeEach(async ({ page }) => {
         // Load environment configuration
-        coffeshopQWebsitePath = "coffeeshop/index.php";
         startPage = new StartPage(page);
     });
 

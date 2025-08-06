@@ -14,16 +14,31 @@ export class StartPage extends BasePage {
         this.fileName = __filename.split(/[\\/]/).pop() || 'PageNotFound';
     }
 
-    async clickGotoCoffeeButton(stepCount: number, testName: string) {
+    async clickGotoCoffeeButton(stepCount: number, testName: string): Promise<void> {
+        const methodName = this.clickGotoCoffeeButton.name;
 
-     try {
-           await this.GotoCoffeButton.click();
-           await StepLogger.logStepSuccess(this.fileName, this.clickGotoCoffeeButton.name, testName, stepCount);
+        try {
+            await this.GotoCoffeButton.click();
+            // Wait for URL to contain 'coffeeshop/shop.php'
+            await this.page.waitForURL(url => url.toString().includes('coffeeshop/shop.php'), { timeout: 5000 });
+
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
+
         } catch (error) {
-            StepLogger.logStepFailed(this.fileName, this.clickGotoCoffeeButton.name, testName, stepCount,this.GotoCoffeButton);
-            throw new Error();
-        }
 
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+            StepLogger.logStepFailed(
+                this.fileName,
+                methodName,
+                testName,
+                stepCount,
+                this.GotoCoffeButton
+            );
+
+            StepLogger.testEnd();
+            throw new Error(`ERROR Details : ${errorMessage}`);
+        }
     }
 
 }
