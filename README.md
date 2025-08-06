@@ -43,6 +43,7 @@ Automated end-to-end testing project using Playwright and TypeScript. Tests run 
   - [ESLint HTML Report](#eslint-html-report)
   - [Allure Report](#allure-report)
   - [Custom HTML Test Report](#custom-html-test-report)
+- [TODO - Improve the Framework](#todo---improve-the-framework)
 ----
 
 ## Project Structure & Development Guidelines
@@ -182,8 +183,6 @@ The `.gitignore` file is configured to exclude files and directories that should
 
 **Temporary Files:**
     - `temp/` - Temporary files and intermediate data generated during test runs
-
-
 
 
 - **Dependencies & Build Artifacts:**
@@ -789,3 +788,21 @@ In GitHub Actions, the Allure report can be automatically uploaded as artifact:
     path: allure-report/
     retention-days: 30
 ```
+
+## TODO - Improve the Framework
+
+### Tests and Pages
+
+- [ ] Complete all pages
+- [ ] Complete all test specs
+- [ ] Generate 10 Test for every test specs
+
+
+### Reporting
+
+- [ ] Fix reporting (Custom Report). At the moment, when a step fails, the test stops, and the Logger only shows all steps up to the failed step. The remaining steps are skipped and are not counted in the hrml report.
+
+### CI/CD
+
+- [ ] Generate reusable Docker image and use it in the pipeline
+

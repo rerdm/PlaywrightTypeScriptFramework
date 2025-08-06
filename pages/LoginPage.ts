@@ -22,7 +22,7 @@ export class LoginPage extends BasePage {
     constructor(page: Page) {
         super(page);
 
-        this.usernameInput = page.locator("//input[@id='login-username']");
+        this.usernameInput = page.locator("//input[@id='login-username-']");
         this.passwordInput = page.locator("//input[@id='login-password']");
         this.submitButton = page.locator("//input[@id='login-submit']"); 
         this.registrationButton = page.locator("//a[normalize-space()='Anmelden']");
