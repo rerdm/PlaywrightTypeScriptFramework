@@ -1,9 +1,8 @@
 import { Page,Locator } from "playwright/test";
 import { StepLogger } from "../utils/StepLogger";
-import test from "node:test";
 
 export default class MenubarItems {
-    // create a new instance of the Menubar class
+
     private page: Page;
     private homeMenuButton: Locator;
     private aboutMenuButton: Locator;
@@ -14,8 +13,6 @@ export default class MenubarItems {
 
     private fileName: string;
 
-
-    // Constructor to initialize the page and menu buttons
     constructor(page: Page) {
         this.page = page;
         this.homeMenuButton = this.page.locator("//a[normalize-space()='Home']");
@@ -26,73 +23,149 @@ export default class MenubarItems {
         this.cartMenuButton = this.page.locator('#shoppingcart');
 
         this.fileName = __filename.split(/[\\/]/).pop() || 'PageNotFound';
-
     }
 
-    // Method to navigate to the home page
-    MenubarItems() {
-        return new MenubarItems(this.page);
-    }
+    async HomeButtonClick(stepCount: number, testName: string): Promise<void> {
 
-    async HomeButtonClick(stepCount: number, testName: string) {
+        const methodName = this.HomeButtonClick.name;
+        
         try {
-            await this.homeMenuButton.click();
-            await StepLogger.logStepSuccess(this.fileName, this.HomeButtonClick.name, testName, stepCount);
+            await this.homeMenuButton.waitFor({ state: 'visible' });
+            await this.homeMenuButton.click({ timeout: 10000 });
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
         } catch (error) {
-            StepLogger.logStepFailed(this.fileName, this.HomeButtonClick.name, testName, stepCount, this.homeMenuButton);
-            throw new Error();
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            
+            await StepLogger.logStepFailed(
+                this.fileName, 
+                methodName, 
+                testName, 
+                stepCount, 
+                this.homeMenuButton
+            );
+            
+            StepLogger.testEnd();
+             throw new Error(`ERROR Details : ${errorMessage}`);
         }
     }
-    async AboutbuttonClick(stepCount: number, testName: string) {
+
+    async AboutbuttonClick(stepCount: number, testName: string): Promise<void> {
+
+        const methodName = this.AboutbuttonClick.name;
+        
         try {
-            await this.aboutMenuButton.click();
-            await StepLogger.logStepSuccess(this.fileName, this.AboutbuttonClick.name, testName, stepCount);
+            await this.aboutMenuButton.waitFor({ state: 'visible' });
+            await this.aboutMenuButton.click({ timeout: 10000 });
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
         } catch (error) {
-            StepLogger.logStepFailed(this.fileName, this.AboutbuttonClick.name, testName, stepCount, this.aboutMenuButton);
-            throw new Error();
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            
+            await StepLogger.logStepFailed(
+                this.fileName, 
+                methodName, 
+                testName, 
+                stepCount, 
+                this.aboutMenuButton
+            );
+            
+            StepLogger.testEnd();
+            throw new Error(`ERROR Details : ${errorMessage}`);
         }
     }
 
-    async ShopButtonClick(stepCount: number, testName: string) {
+    async ShopButtonClick(stepCount: number, testName: string): Promise<void> {
+
+        const methodName = this.ShopButtonClick.name;
+        
         try {
-            await this.shopMenuButton.click();
-            await StepLogger.logStepSuccess(this.fileName, this.ShopButtonClick.name,testName, stepCount);
+            await this.shopMenuButton.waitFor({ state: 'visible' });
+            await this.shopMenuButton.click({ timeout: 10000 });
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
         } catch (error) {
-            StepLogger.logStepFailed(this.fileName, this.ShopButtonClick.name, testName, stepCount, this.shopMenuButton);
-            throw new Error();
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            
+            await StepLogger.logStepFailed(
+                this.fileName, 
+                methodName, 
+                testName, 
+                stepCount, 
+                this.shopMenuButton
+            );
+            
+            StepLogger.testEnd();
+            throw new Error(`ERROR Details : ${errorMessage}`);
         }
     }   
 
-    async ContactButtonClick(stepCount: number, testName: string) {
+    async ContactButtonClick(stepCount: number, testName: string): Promise<void> {
+
+        const methodName = this.ContactButtonClick.name;
+        
         try {
-            await this.contactMenuButton.click();
-            await StepLogger.logStepSuccess(this.fileName, this.ContactButtonClick.name, testName, stepCount);
+            await this.contactMenuButton.waitFor({ state: 'visible' });
+            await this.contactMenuButton.click({ timeout: 10000 });
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
         } catch (error) {
-            StepLogger.logStepFailed(this.fileName, this.ContactButtonClick.name, testName, stepCount, this.contactMenuButton);
-            throw new Error();
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            
+            await StepLogger.logStepFailed(
+                this.fileName, 
+                methodName, 
+                testName, 
+                stepCount, 
+                this.contactMenuButton
+            );
+            
+            StepLogger.testEnd();
+            throw new Error(`ERROR Details : ${errorMessage}`);
         }
     }
 
-    async LoginButtonClick(stepCount: number, testName: string) {   
+    async LoginButtonClick(stepCount: number, testName: string): Promise<void> {
 
+        const methodName = this.LoginButtonClick.name;
+        
         try {
-            await this.loginMenuButton.click();
-            await StepLogger.logStepSuccess(this.fileName, this.LoginButtonClick.name,testName, stepCount);
-
+            await this.loginMenuButton.waitFor({ state: 'visible' });
+            await this.loginMenuButton.click({ timeout: 10000 });
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
         } catch (error) {
-            StepLogger.logStepFailed(this.fileName, this.LoginButtonClick.name, testName, stepCount, this.loginMenuButton);
-            throw new Error();
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            
+            await StepLogger.logStepFailed(
+                this.fileName, 
+                methodName, 
+                testName, 
+                stepCount, 
+                this.loginMenuButton
+            );
+            
+            StepLogger.testEnd();
+            throw new Error(`ERROR Details : ${errorMessage}`);
         }
     }
-    async CartButtonClick(stepCount: number, testName: string) {
+
+    async CartButtonClick(stepCount: number, testName: string): Promise<void> {
+
+        const methodName = this.CartButtonClick.name;
+        
         try {
-            await this.cartMenuButton.click();
-            await StepLogger.logStepSuccess(this.fileName, this.CartButtonClick.name,testName,  stepCount);
+            await this.cartMenuButton.waitFor({ state: 'visible' });
+            await this.cartMenuButton.click({ timeout: 10000 });
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
         } catch (error) {
-            StepLogger.logStepFailed(this.fileName, this.CartButtonClick.name, testName, stepCount, this.cartMenuButton);
-            throw new Error();
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            
+            await StepLogger.logStepFailed(
+                this.fileName, 
+                methodName, 
+                testName, 
+                stepCount, 
+                this.cartMenuButton
+            );
+            
+            StepLogger.testEnd();
+            throw new Error(`ERROR Details : ${errorMessage}`);
         }
     }
-
-
 }

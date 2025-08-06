@@ -54,7 +54,7 @@ Automated end-to-end testing project using Playwright and TypeScript. Tests run 
 
 Remove files from Git (if already added with `git add`)
 ``` 
-git rm --cached loggedInState.json notLoggedInState.json
+git rm --cached file1 file2
 git rm -r --cached folderName
 ```
 
@@ -102,12 +102,6 @@ The project supports multiple environments through `.env` files and npm scripts 
 - **staging** - Pipeline tests without browser (HEADLESS=true)
 
 **Important**: If the IP address changes (local) or the staging URL changes (different GitHub Page URL) - the envs must be adjusted.
-
-#### Environment Files
-
-- `.env.staging` - Staging environment (Headless=true) 
-- `.env.local` - Local development/local test (Headless=false)
-
 
 ### Creating New Environment
 

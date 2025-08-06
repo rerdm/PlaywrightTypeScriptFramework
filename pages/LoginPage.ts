@@ -1,7 +1,6 @@
-import {expect, Locator, Page} from '@playwright/test';
+import {Locator, Page} from '@playwright/test';
 import BasePage from './BasePage';
 import { StepLogger } from "../utils/StepLogger";
-import test from 'node:test';
 
 
 export class LoginPage extends BasePage {
@@ -26,8 +25,7 @@ export class LoginPage extends BasePage {
         this.usernameInput = page.locator("//input[@id='login-username']");
         this.passwordInput = page.locator("//input[@id='login-password']");
         this.submitButton = page.locator("//input[@id='login-submit']"); 
-        this.registrationButton = page.locator("//a[normalize-space()='Anmelden']"); // Name should be change in Registration
-
+        this.registrationButton = page.locator("//a[normalize-space()='Anmelden']");
         
         this.usernameWrongMsg = page.locator("//span[@id='login-username-msg']");
         this.passwordWrongMsg = page.locator("//span[@id='login-password-msg']");
@@ -41,35 +39,100 @@ export class LoginPage extends BasePage {
 
     }
     
-    async UsernameInputField(username: string, stepCount: number, testName: string) {
-        
+    async UsernameInputField(username: string, stepCount: number, testName: string): Promise<void> {
+
+        const methodName = this.UsernameInputField.name;
 
         try {
+            await this.usernameInput.waitFor({ state: 'visible' });
             await this.usernameInput.fill(username);
-            await StepLogger.logStepSuccess(this.fileName, this.UsernameInputField.name, testName, stepCount);
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
         } catch (error) {
-            StepLogger.logStepFailed(this.fileName, this.UsernameInputField.name,testName, stepCount,this.usernameInput);
-            throw new Error();
-        }
-        
-    }
-    async PasswordInputField(password: string, stepCount: number, testName: string) {
-        try {
-            await this.passwordInput.fill(password);
-            await StepLogger.logStepSuccess(this.fileName, this.PasswordInputField.name,testName, stepCount);
-        } catch (error) {
-            StepLogger.logStepFailed(this.fileName, this.PasswordInputField.name, testName, stepCount, this.passwordInput);
-            throw new Error();
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            
+            await StepLogger.logStepFailed(
+                this.fileName, 
+                methodName, 
+                testName, 
+                stepCount, 
+                this.usernameInput
+            );
+            
+            StepLogger.testEnd();
+            throw new Error(`Failed to fill username field: ${errorMessage}`);
         }
     }
 
-    async ClickSubmitButton(stepCount: number, testName: string) {
+    async PasswordInputField(password: string, stepCount: number, testName: string): Promise<void> {
+
+        const methodName = this.PasswordInputField.name;
+
         try {
-            await this.submitButton.click();
-            await StepLogger.logStepSuccess(this.fileName, this.ClickSubmitButton.name, testName, stepCount);
+            await this.passwordInput.waitFor({ state: 'visible' });
+            await this.passwordInput.fill(password);
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
         } catch (error) {
-            StepLogger.logStepFailed(this.fileName, this.ClickSubmitButton.name, testName, stepCount, this.submitButton);
-            throw new Error();
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            
+            await StepLogger.logStepFailed(
+                this.fileName, 
+                methodName, 
+                testName, 
+                stepCount, 
+                this.passwordInput
+            );
+            
+            StepLogger.testEnd();
+            throw new Error(`ERROR Details : ${errorMessage}`);
+        }
+    }
+
+    async ClickSubmitButton(stepCount: number, testName: string): Promise<void> {
+
+        const methodName = this.ClickSubmitButton.name;
+        
+
+        try {
+            await this.submitButton.waitFor({ state: 'visible' });
+            await this.submitButton.click({ timeout: 10000 });
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            
+            await StepLogger.logStepFailed(
+                this.fileName, 
+                methodName, 
+                testName, 
+                stepCount, 
+                this.submitButton
+            );
+            
+            StepLogger.testEnd();
+            throw new Error(`ERROR Details : ${errorMessage}`);
+        }
+    }
+
+    async ClickRegistrationButton(stepCount: number, testName: string): Promise<void> {
+        
+        const methodName = this.ClickRegistrationButton.name;
+
+        try {
+            await this.registrationButton.waitFor({ state: 'visible' });
+            await this.registrationButton.click({ timeout: 10000 });
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+            await StepLogger.logStepFailed(
+                this.fileName,
+                methodName,
+                testName,
+                stepCount,
+                this.registrationButton
+            );
+
+            StepLogger.testEnd();
+            throw new Error(`ERROR Details : ${errorMessage}`);
         }
     }
 

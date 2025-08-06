@@ -6,6 +6,9 @@ node_modules/
 /allure-report/
 /allure-results/
 
+#tmp folder
+/temp/
+
 # Debug files
 debug-login.js
 debug-accountbar.js

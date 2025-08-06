@@ -14,50 +14,85 @@ export class LoggedInPage extends BasePage {
         this.profilButton = page.locator("//a[normalize-space()='Profil']");
         this.logoutButton = page.locator("//a[normalize-space()='Logout']");
       
-
         // Initialize the fileName variable to the current file name
         this.fileName = __filename.split(/[\\/]/).pop() || 'PageNotFound';
 
     }
 
-    async ProfileButtonClick(stepCount: number, testName: string) {
+
+    async ProfileButtonClick(stepCount: number, testName: string): Promise<void> {
+
+        const methodName = this.ProfileButtonClick.name;
         
         try {
-            await this.profilButton.click();
-            await StepLogger.logStepSuccess(this.fileName, this.ProfileButtonClick.name, testName, stepCount);
+            await this.profilButton.waitFor({ state: 'visible' });
+            await this.profilButton.click({ timeout: 10000 });
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
         } catch (error) {
-            StepLogger.logStepFailed(this.fileName, this.ProfileButtonClick.name,testName, stepCount,this.profilButton);
-            throw new Error();
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            
+            await StepLogger.logStepFailed(
+                this.fileName, 
+                methodName, 
+                testName, 
+                stepCount, 
+                this.profilButton
+            );
+            
+            StepLogger.testEnd();
+            throw new Error(`Error deteils : ${errorMessage}`);
         }
-        
     }
 
-    async Logoutbutton(stepCount: number, testName: string) {
+    async Logoutbutton(stepCount: number, testName: string): Promise<void> {
 
+        const methodName = this.Logoutbutton.name;
+        
         try {
-            await this.logoutButton.click();
-            await StepLogger.logStepSuccess(this.fileName, this.Logoutbutton.name, testName, stepCount);
+            await this.logoutButton.waitFor({ state: 'visible' });
+            await this.logoutButton.click({ timeout: 10000 });
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
         } catch (error) {
-            StepLogger.logStepFailed(this.fileName, this.Logoutbutton.name,testName, stepCount,this.profilButton);
-            throw new Error();
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            
+            await StepLogger.logStepFailed(
+                this.fileName, 
+                methodName, 
+                testName, 
+                stepCount, 
+                this.logoutButton  // Korrektur: war profilButton
+            );
+            
+            StepLogger.testEnd();
+            throw new Error(`Error deteils : ${errorMessage}`);
         }
-        
     }
 
-    async CheckIfLoggedInUsernameIsVisble(stepCount: number, username: string, testName: string) {
+    async CheckIfLoggedInUsernameIsVisble(stepCount: number, username: string, testName: string): Promise<void> {
 
+        const methodName = this.CheckIfLoggedInUsernameIsVisble.name;
 
         const dynamicUsernameLocator = this.page.locator(`//td[normalize-space()='${username}']`);
-
+        
         try {
+            await dynamicUsernameLocator.waitFor({ state: 'visible', timeout: 5000 });
             await expect(dynamicUsernameLocator).toBeVisible({ timeout: 5000 });
-            StepLogger.logStepSuccess(this.fileName, this.CheckIfLoggedInUsernameIsVisble.name, testName, stepCount);
-        } catch (error) {
-            StepLogger.logStepFailed(this.fileName, this.CheckIfLoggedInUsernameIsVisble.name, testName, stepCount, dynamicUsernameLocator);
-            StepLogger.testEnd();
-            throw new Error();
-        }
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
 
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            
+            await StepLogger.logStepFailed(
+                this.fileName, 
+                methodName, 
+                testName, 
+                stepCount, 
+                dynamicUsernameLocator
+            );
+            
+            StepLogger.testEnd();
+            throw new Error(`Error deteils : ${errorMessage}`);
+        }
     }
 
 }
