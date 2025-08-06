@@ -2,6 +2,7 @@
 import { StartPage } from "../pages/StartPage";
 import { LoginPage } from "../pages/LoginPage";
 import { LoggedInPage } from "../pages/LoggedInPage";
+import { RegistrationPage } from "../pages/RegistrationPage";
 
 
 import MenubarItems from "../components/menubar.component";
@@ -16,23 +17,26 @@ test.describe('Login Page Tests', () => {
   let startPage: StartPage;
   let loginPage: LoginPage;
   let loggedInPage: LoggedInPage;
-  let menubarItems: MenubarItems;
+  let registrationPage: RegistrationPage;
+
+
   let envConfig = loadEnvironmentConfig();
   let expectedUrl = envConfig.baseURL;
-  let username = envConfig.Username || 'defaultUser';
-  let password = envConfig.Password || 'defaultPassword';
   let testSpecName = __filename.split(/[\\/]/).pop() || 'PageNotFound';
   let stepCount = 0;
   let testName: string;
+
+  let newUser: string;
+  let password: string;
+  let passwordRepeat: string;
 
   test.beforeEach(async ({ page }) => {
 
     startPage = new StartPage(page);
     loginPage = new LoginPage(page);
     loggedInPage = new LoggedInPage(page);
-    menubarItems = new MenubarItems(page);
+    registrationPage = new RegistrationPage(page);
 
-   
   });
 
   test.beforeAll(async () => {
@@ -47,13 +51,17 @@ test.describe('Login Page Tests', () => {
     console.log('✅ Login tests completed');
   });
  
-  test('Open Website and Login in @LOGIN-001', async ({ page }) => {
+  test('Open Website and Login in @REGISTRATION-001', async ({ page }) => {
 
     // This test uses fresh session without storage state
     await page.context().clearCookies();
     await page.context().clearPermissions();
     stepCount = 0;
     testName = test.info().title,
+
+    newUser = "VPNUser02";
+    password = "password1234";
+    passwordRepeat = password
 
     StepLogger.startTest(testName, envConfig.environment, testSpecName);
 
@@ -63,31 +71,45 @@ test.describe('Login Page Tests', () => {
 
     // Step 2
     stepCount++;
-    await menubarItems.LoginButtonClick(stepCount, testName);
+    await startPage.MenubarItems.LoginButtonClick(stepCount, testName);
 
     // Step 3
     stepCount++;
-    await loginPage.UsernameInputField(username,stepCount, testName);
+    await loginPage.ClickRegistrationButton(stepCount, testName);
 
     // Step 4
     stepCount++;
-    await loginPage.PasswordInputField(password,stepCount, testName);
+    await registrationPage.UsernameInputField(newUser,stepCount, testName);
 
     // Step 5
     stepCount++;
-    await loginPage.ClickSubmitButton(stepCount, testName);
-
+    await registrationPage.PasswordInputField(password, stepCount, testName);
+    StepLogger.logRegisteredUSer(newUser, password);
 
     // Step 6
     stepCount++;
-    await loggedInPage.CheckIfLoggedInUsernameIsVisble(stepCount, username, testName);
+    await registrationPage.PasswordRepeadtInputField(password, stepCount, testName);
+
+
+    // Step 7
+    stepCount++;
+    await registrationPage.ClickAgbCheckBox(stepCount, testName);
+
+
+    // Step 7
+    stepCount++;
+    await registrationPage.ClickRegistrationButton(stepCount, testName);
+
+    
 
     StepLogger.testEnd();
 
 
+
+
   });
 
-  test('Open Website and Login in with invalid credentials @LOGIN', async ({ page }) => {
+  test('Open Website and Login in with invalid credentials @REGISTRATION-002', async ({ page }) => {
     // This test uses the logged-in storage state from the config
 
     // This test uses fresh session without storage state
@@ -107,7 +129,7 @@ test.describe('Login Page Tests', () => {
 
     // Step 
     stepCount++;
-    await menubarItems.LoginButtonClick(stepCount, testName);
+    await loginPage.MenubarItems.LoginButtonClick(stepCount, testName);
 
     // Step 3
     stepCount++;
@@ -123,7 +145,7 @@ test.describe('Login Page Tests', () => {
 
     // Step 6
     stepCount++;
-    await loggedInPage.CheckIfLoggedInUsernameIsVisble(stepCount, username, testName);
+    await registrationPage.CheckIfLogoutButtonIsNotAvailabel(stepCount, invalidUsername);
 
     StepLogger.testEnd();
 

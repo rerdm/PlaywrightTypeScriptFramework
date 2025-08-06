@@ -125,6 +125,17 @@ export class StepLogger {
         console.log(`[${timestamp}] STEP ${stepCount} - PASSED - Filename: {${fileName}} Methodname: {${methodName}} Testname: {${testName}} URL: {${URL}}`);
     }
 
+    static async logRegisteredUSer(username: string, password: string): Promise<void> {
+
+        console.log('═'.repeat(100));
+        console.log(`Registered User : `)
+        console.log(`Username: ${username}`);
+        console.log(`Password: ${password}`);
+        console.log('═'.repeat(100));
+
+    }
+
+
     static async testEnd(): Promise<void> {
         const timestamp = new Date().toLocaleString();
         const totalSteps = this.passedStepsCount + this.failedStepsCount;

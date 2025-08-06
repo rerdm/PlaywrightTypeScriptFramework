@@ -1,0 +1,10 @@
+{
+  "searchProducts": {
+    "Espresso": "Espresso",
+    "Cappuccino": "Cappuccino",
+    "Latte Macchiato": "Latte Macchiato",
+    "Americano": "Americano",
+    "Arabica": "Arabica",
+    "Robusta": "Robusta"
+  }
+}

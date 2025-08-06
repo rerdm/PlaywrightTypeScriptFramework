@@ -1,4 +1,4 @@
-
+// pages/BasePage.ts
 import MenubarItems from "../components/menubar.component";
 import FooterItems from "../components/footer.components";
 import { StepLogger } from "../utils/StepLogger";
@@ -11,6 +11,7 @@ import { Page } from 'playwright';
 // implemented pages MenubarItems and FooterItems as properties of BasePage
 
 export default class BasePage {
+
     page: Page;
     MenubarItems: MenubarItems;
     FooterItems: FooterItems;
@@ -18,6 +19,7 @@ export default class BasePage {
 
 
     constructor(page: Page) {
+
         this.page = page;
 
         this.MenubarItems = new MenubarItems(page);
@@ -63,5 +65,7 @@ export default class BasePage {
             StepLogger.testEnd();
             throw new Error(`ERROR Details : ${errorMessage}`);
         }
+
+
     }
 }
