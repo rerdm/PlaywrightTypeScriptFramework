@@ -793,6 +793,7 @@ In GitHub Actions, the Allure report can be automatically uploaded as artifact:
 
 ### Tests and Pages
 
+- [ ] Fix lint problems
 - [ ] Complete all pages
 - [ ] Complete all test specs
 - [ ] Generate 10 Test for every test specs
