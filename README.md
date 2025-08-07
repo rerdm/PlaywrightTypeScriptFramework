@@ -44,7 +44,7 @@ Automated end-to-end testing project using Playwright and TypeScript. Tests run 
       - [2. Store the Token as a GitHub Secret](#2-store-the-token-as-a-github-secret)
       - [3. Download and Install GitHub CLI](#3-download-and-install-github-cli)
       - [4. Authenticate GitHub CLI](#4-authenticate-github-cli)
-    - [Test Reports](#test-reports)
+- [Test Reports](#test-reports)
   - [Playwright HTML Report](#playwright-html-report)
   - [ESLint HTML Report](#eslint-html-report)
   - [Allure Report](#allure-report)
@@ -895,5 +895,6 @@ In GitHub Actions, the Allure report can be automatically uploaded as artifact:
 
 ### CI/CD
 
+- [x] Adding Workflow_dipatch to execute playwright.yml per ci tool
 - [ ] Generate reusable Docker image and use it in the pipeline
 
