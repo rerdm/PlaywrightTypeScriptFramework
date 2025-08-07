@@ -114,16 +114,31 @@ PlaywrightTypeScriptFramework/
 
 1. **BasePage**: Never modify `BasePage.ts` - it contains core functionality
 2. **StepLogger**: Always use `StepLogger` for logging - it generates both terminal output and HTML reports
-3. **Error Handling**: All methods must include proper try-catch blocks with `StepLogger.logStepFailed()`
+3. **Error Handling**: All methods must include proper try-catch blocks with `StepLogger.logStepSuccess()` and `StepLogger.logStepFailed()`- URL methods uses `tepLogger.logStepPassedToOpenUrl` and `StepLogger.logStepFailedToOpenUrl()` (See BasePage)
+
 4. **Method Structure**: Follow the established pattern:
-   ```typescript
+  ```typescript
    async MethodName(parameters: type, stepCount: number, testName: string): Promise<void> {
+
        const methodName = this.MethodName.name;
+
        try {
-           // Method logic
-           await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
+           // Method logic (await this.methodName.fill(username); see initialization in BasePage)
+            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
        } catch (error) {
-           // Error handling with StepLogger.logStepFailed()
+
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+            await StepLogger.logStepFailed(
+                this.fileName, 
+                methodName, 
+                testName, 
+                stepCount, 
+                this.methodName
+            );
+            
+            StepLogger.testEnd();
+            throw new Error(`Error deteils : ${errorMessage}`);
        }
    }
    ```
