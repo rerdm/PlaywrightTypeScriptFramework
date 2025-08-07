@@ -6,6 +6,9 @@ node_modules/
 /allure-report/
 /allure-results/
 
+# Ignore secrets folder
+secrets/
+
 #tmp folder
 /temp/
 
