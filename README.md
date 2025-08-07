@@ -38,20 +38,29 @@ Automated end-to-end testing project using Playwright and TypeScript. Tests run 
   - [Pipeline Integration](#pipeline-integration)
 - [GitHub Actions Workflows](#github-actions-workflows)
   - [Workflow Trigger](#workflow-trigger)
-- [Test Reports](#test-reports)
+    - [Push and Pull](#push-and-pull)
+    - [Gh CI Tool - Workflow_dispatch](#gh-ci-tool---workflow_dispatch)
+      - [1. Generate a Personal Access Token in GitHub](#1-generate-a-personal-access-token-in-github)
+      - [2. Store the Token as a GitHub Secret](#2-store-the-token-as-a-github-secret)
+      - [3. Download and Install GitHub CLI](#3-download-and-install-github-cli)
+      - [4. Authenticate GitHub CLI](#4-authenticate-github-cli)
+    - [Test Reports](#test-reports)
   - [Playwright HTML Report](#playwright-html-report)
   - [ESLint HTML Report](#eslint-html-report)
   - [Allure Report](#allure-report)
   - [Custom HTML Test Report](#custom-html-test-report)
 - [TODO - Improve the Framework](#todo---improve-the-framework)
+
 ----
 
-## Project Structure & Development Guidelines
+<br>
 
-### Overview
+# Project Structure & Development Guidelines
+
+## Overview
 This Playwright TypeScript framework is designed for automated testing with a page object model pattern. All test components are organized in a clear structure to ensure maintainability and scalability.
 
-### Project Structure
+## Project Structure
 ```
 PlaywrightTypeScriptFramework/
 ├── components/        # Includes functions shared across all pages 
@@ -550,10 +559,76 @@ After each pipeline run, an **interactive HTML report** is created:
 
 ## GitHub Actions Workflows
 
-### Workflow Trigger (`playwright-tests.yml`):
+### Workflow Trigger:
+
+#### Push and Pull
 - Push from local feature branch to `main` or `master` branch
 - Pull requests from local feature branch to `main` or `master` branch  
 - Manually via GitHub Actions UI
+
+### Gh CI Tool - Workflow_dispatch
+
+You can use the GitHub CLI (`gh`) tool to manually trigger GitHub Actions workflows from your terminal. Follow these steps:
+
+#### 1. Generate a Personal Access Token in GitHub
+
+- Go to **GitHub → Settings → Developer settings → Personal access tokens** (https://github.com/settings/tokens) 
+- Click **"Generate new token"** ( Fine-granted-repo-scope)
+- Set `Token name`.
+- Set `Description (Optinal)`
+- Set ``Expiration date``
+- Set `Repository acess` (Public, All repos, Only select repos )
+- Copy and save the token securely.
+
+#### 2. Store the Token as a GitHub Secret
+
+- In your repository, go to **Settings → Secrets and variables → Actions**.
+- Click **"New repository secret"**.
+- Name it (e.g., `GH_TOKEN`) and paste your token.
+
+#### 3. Download and Install GitHub CLI
+
+- Download from: [https://cli.github.com/](https://cli.github.com/)
+- Install using the instructions for your OS.
+
+#### 4. Authenticate GitHub CLI
+
+```bash
+gh auth login
+
+PS C:\xx\xx\xx\xx> gh auth login
+? Where do you use GitHub? -->  GitHub.com
+? What is your preferred protocol for Git operations on this host? -->  HTTPS
+? Authenticate Git with your GitHub credentials? --> Yes
+? How would you like to authenticate GitHub CLI? --> Login with a web browser
+
+! First copy your one-time code: XXXX-XXXX --> Paste it in GitHub.com
+
+```
+
+#### 5. Trigger a Workflow Manually
+
+List available workflows:
+```bash
+gh workflow list
+```
+
+Trigger a workflow by name or file:
+```bash
+gh workflow run <workflow_file.yml>
+```
+Or, if you know the workflow name:
+```bash
+gh workflow run "<workflow name>"
+```
+
+Check workflow run status:
+```bash
+gh run list
+```
+
+**Tip:**  
+You must have push or workflow permissions to trigger workflows via CLI.
 
 
 ## Test Reports
