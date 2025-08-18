@@ -32,6 +32,8 @@ Automated end-to-end testing project using Playwright and TypeScript. Tests run 
   - [Utils](#utils)
     - [Generate Test Documentation](#generate-test-documentation)
     - [User-Registry System](#user-registry-system)
+- [Useful Tools](#useful-tools)
+  - [Playwright Codegen (UI-Tool speed up locator analyse)](#playwright-codegen-ui-tool-speed-up-locator-analyse)
 - [Code Quality & Linting](#code-quality--linting)
   - [ESLint Configuration](#eslint-configuration)
   - [Local Testing](#local-testing)
@@ -411,6 +413,55 @@ Creation Date,Username,Password,Environment
 4. **Debugging Support:** Helps with tracking test problems
 5. **Excel Integration:** Optional Excel export for extended data analysis
 
+
+## Useful Tools
+
+### Playwright Codegen (UI-Tool speed up locator analyse)
+
+#### What is Playwright Codegen?
+
+Playwright Codegen is a tool provided by Playwright to automatically generate test scripts by recording user interactions with a browser. It simplifies the creation of test cases by capturing actions like clicks, inputs, and navigation.
+
+#### Required Software
+
+To use Playwright Codegen, ensure the following software is installed:
+- **Node.js**: Required to run Playwright.
+- **Playwright**: Installed via `npm install playwright`.
+- **Browsers**: Installed via `npx playwright install`.
+
+#### How to Use Playwright Codegen
+
+1. **Start Codegen**:
+   Run the following command to start Playwright Codegen:
+   ```bash
+   npx playwright codegen
+   ```
+   This will open a browser window and a Playwright Inspector.
+
+   Below is an example of the Playwright Codegen UI:
+
+![Playwright Codegen UI](images/PlaywrightCodegen.png)
+
+**NOTE:** You can choose between different frameworks (e.g., Python with Pytest, etc.).
+
+2. **Record Actions**:
+   - Interact with the browser as you would during a test (e.g., click buttons, fill forms, navigate pages).
+   - The actions will be recorded and displayed in the Playwright Inspector.
+
+3. **Save the Script**:
+   - Once recording is complete, copy the generated script from the Inspector.
+
+#### Playwright Codegen UI
+
+The Playwright Codegen UI provides a visual interface to record and inspect user interactions. It consists of two main components:
+1. **Browser Window**: Displays the website where interactions are recorded.
+2. **Inspector Panel**: Shows the generated code in real-time and allows you to copy or modify it.
+
+
+#### Notes
+
+- The generated script may require adjustments to align with the project's structure and conventions.
+- Use the tool for initial script creation and refine the script as needed.
 
 ## Code Quality & Linting
 
