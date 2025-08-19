@@ -32,7 +32,7 @@ pipeline {
                     echo "Running command: ${npmCommand}"
 
                     // Execute the constructed npm command
-                    //sh "${npmCommand}" // enabeling for running the test
+                    sh "${npmCommand}" // enabeling for running the test
                 }
             }
         }
