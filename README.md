@@ -38,14 +38,20 @@ Automated end-to-end testing project using Playwright and TypeScript. Tests run 
   - [ESLint Configuration](#eslint-configuration)
   - [Local Testing](#local-testing)
   - [Pipeline Integration](#pipeline-integration)
-- [GitHub Actions Workflows](#github-actions-workflows)
-  - [Workflow Trigger](#workflow-trigger)
+- [CI/CD Workflows](#cicd-workflows)
+  - [Github Actions Workflow and Trigger](#github-actiosn-workflow-and-trigger)
     - [Push and Pull](#push-and-pull)
     - [Gh CI Tool - Workflow_dispatch](#gh-ci-tool---workflow_dispatch)
       - [1. Generate a Personal Access Token in GitHub](#1-generate-a-personal-access-token-in-github)
       - [2. Store the Token as a GitHub Secret](#2-store-the-token-as-a-github-secret)
       - [3. Download and Install GitHub CLI](#3-download-and-install-github-cli)
       - [4. Authenticate GitHub CLI](#4-authenticate-github-cli)
+  - [Jenkins](#jenkins)
+    - [Introduction to Jenkins](#introduction-to-jenkins)
+    - [How to Create a Pipeline Job in Jenkins](#how-to-create-a-pipeline-job-in-jenkins)
+    - [Adding Parameters to the Pipeline](#adding-parameters-to-the-pipeline)
+    - [Using Parameters in the Jenkinsfile](#using-parameters-in-the-jenkinsfile)
+    - [Running the Pipeline](#running-the-pipeline)
 - [Test Reports](#test-reports)
   - [Playwright HTML Report](#playwright-html-report)
   - [ESLint HTML Report](#eslint-html-report)
@@ -608,9 +614,11 @@ After each pipeline run, an **interactive HTML report** is created:
 4. **Efficient Resource Usage**: Tests only run on clean code
 5. **📊 Interactive HTML Reports**: Easy analysis of code problems
 
-## GitHub Actions Workflows
+## CI/CD Workflows
 
-### Workflow Trigger:
+### Github Actiosn Workflow and Trigger
+
+GitHub Actions is a CI/CD platform that automates building, testing, and deploying your code directly from your GitHub repository using customizable workflows.
 
 #### Push and Pull
 - Push from local feature branch to `main` or `master` branch
@@ -681,6 +689,97 @@ gh run list
 **Tip:**  
 You must have push or workflow permissions to trigger workflows via CLI.
 
+### Jenkins
+
+#### Introduction to Jenkins
+
+Jenkins is an open-source automation server used to build, test, and deploy software projects. It supports continuous integration and continuous delivery (CI/CD) pipelines. Jenkins can execute jobs defined in a `Jenkinsfile` stored in your source control management (SCM) system.
+
+#### How to Create a Pipeline Job in Jenkins
+
+1. **Install Jenkins (local on windows)**:
+   - Download Jenkins from [https://www.jenkins.io/](https://www.jenkins.io/).
+   - Install it on your local machine or server.
+
+2. **Access Jenkins**:
+   - Open Jenkins in your browser (default: `http://localhost:8080`).
+
+3. **Create a New Pipeline Job**:
+   - Click on **"New Item"** in the Jenkins dashboard.
+   - Enter a name for your job (e.g., `PlaywrightTests`).
+   - Select **"Pipeline"** as the project type and click **"OK"**.
+
+4. **Configure the Pipeline**:
+   - Under the **"Pipeline"** section, select **"Pipeline script from SCM"**.
+   - Choose **"Git"** as the SCM.
+   - Enter the repository URL (e.g., `https://github.com/rerdm/PlaywrightTypeScriptFramework.git`).
+   - Specify the branch to build (e.g., `main` or `master`).
+   - Set the **Script Path** to the location of your `Jenkinsfile` (e.g., `jenkinsfile`).
+
+5. **Save and Apply**:
+   - Click **"Save"** to store the configuration.
+
+#### Adding Parameters to the Pipeline
+
+1. **Enable Parameters**:
+   - In the job configuration, check **"This project is parameterized"**.
+
+2. **Add Parameters**:
+   - Click **"Add Parameter"** and choose the type of parameter:
+     - **Choice Parameter**: For dropdown options (e.g., `Environment` with values `staging` and `local`).
+     - **String Parameter**: For text input (e.g., `Tag` with default value `@SMOKE`).
+     - **Boolean Parameter**: For true/false options (e.g., `Headed`).
+
+3. **Set Default Values**:
+   - Provide default values and descriptions for each parameter.
+
+#### Using Parameters in the Jenkinsfile
+
+Parameters defined in Jenkins are automatically available in the `Jenkinsfile`. You can access them using the `params` object. For example:
+
+```groovy
+pipeline {
+    agent any
+
+    parameters {
+        choice(name: 'Environment', choices: ['staging', 'local'], description: 'Select the environment')
+        string(name: 'Tag', defaultValue: '@SMOKE', description: 'Playwright tag, e.g., @SMOKE')
+        booleanParam(name: 'Headed', defaultValue: false, description: 'Run tests in headed mode?')
+    }
+
+    stages {
+        stage('Run Playwright Tests') {
+            steps {
+                script {
+                    def npmCommand = "npm run test:${params.Environment}:tc"
+                    if (params.Headed) {
+                        npmCommand += ":headed"
+                    }
+                    npmCommand += " \"${params.Tag}\""
+                    echo "Running command: ${npmCommand}"
+                    bat "${npmCommand}" // Use 'bat' for Windows
+                }
+            }
+        }
+    }
+}
+```
+
+#### Running the Pipeline
+
+1. **Trigger the Job**:
+   - Click **"Build with Parameters"** in the Jenkins job dashboard.
+   - Set the desired parameter values and click **"Build"**.
+
+2. **Monitor the Build**:
+   - View the console output to monitor the progress of the pipeline.
+
+#### Benefits of Using Jenkins
+
+- **Customizable Parameters**: Easily configure test environments, tags, and modes.
+- **SCM Integration**: Automatically fetch and execute the `Jenkinsfile` from your repository.
+- **Automation**: Schedule builds or trigger them based on SCM changes.
+- **Extensibility**: Use plugins to enhance Jenkins functionality.
 
 ## Test Reports
 
