@@ -5,6 +5,10 @@ pipeline {
         // Dropdown parameter to select the environment (staging or local)
         choice(name: 'Environment', choices: ['staging', 'local'], description: 'Select the environment')
         
+        // Dropdown parameter to select the environment (staging or local)
+        choice(name: 'Tag', choices: ['@SMOKE','ALLTests'], description: 'Select the specific test selection by tag or ALLtests for running all tests')
+        
+
         // String parameter to specify the Playwright tag (e.g., @SMOKE)
         string(name: 'Tag', defaultValue: '@SMOKE', description: 'Playwright tag, e.g., @SMOKE')
         
@@ -36,7 +40,10 @@ pipeline {
                     }
 
                     // Add the specified tag to the command
-                    npmCommand = npmCommand + " \"${params.Tag}\""
+
+                    if (params.Tag != 'ALLtests') {
+                        npmCommand = npmCommand + " \"${params.Tag}\""
+                    }
 
                     // Print the constructed command to the console
                     echo "Running command: ${npmCommand}"
