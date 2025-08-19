@@ -70,38 +70,38 @@ pipeline {
                 }
             }
         }
+    }
 
-        post {
-            always {
-                echo "#################################################################################"
-                echo "# BUILD INFORMATION  currentBuild.xx                                                           #"
-                echo "#################################################################################"
-                echo "Build Result                              : ${currentBuild.result}"
-                echo "currentBuild.displayName                  : ${currentBuild.displayName}"
-                echo "currentBuild.fullDisplayName              : ${currentBuild.fullDisplayName}"
-                echo "currentBuild.id                           : ${currentBuild.id}"
-                echo "currentBuild.number                       : ${currentBuild.number}"
-                echo "currentBuild.projectName                  : ${currentBuild.projectName}"
-                echo "currentBuild.description                  : ${currentBuild.description}"
-                echo "currentBuild.duration                     : ${currentBuild.duration}"
-                echo "currentBuild.durationString               : ${currentBuild.durationString}"
-                echo "currentBuild.startTimeInMillis            : ${currentBuild.startTimeInMillis}"
-                echo "currentBuild.timeInMillis                 : ${currentBuild.timeInMillis}"
-                echo "currentBuild.absoluteUrl                  : ${currentBuild.absoluteUrl}"
-                echo "currentBuild.previousBuild                : ${currentBuild.previousBuild}"
-                echo "currentBuild.previousResult               : ${currentBuild.previousResult}"
-                echo "currentBuild.rawBuild                     : ${currentBuild.rawBuild}"
-                echo "currentBuild.result                       : ${currentBuild.result}"
-                echo "currentBuild.buildVariables               : ${currentBuild.buildVariables}"
-                echo "currentBuild.changeSets                   : ${currentBuild.changeSets}"
-                echo "currentBuild.getBuildCauses()             : ${currentBuild.getBuildCauses()}"
-                echo "currentBuild.getBuildCauses().toString()  : ${currentBuild.getBuildCauses().toString()}"
-                echo "#################################################################################"
-            }
+    post { // Ensure this is correctly positioned at the pipeline level
+        always {
+            echo "#################################################################################"
+            echo "# BUILD INFORMATION  currentBuild.xx                                           #"
+            echo "#################################################################################"
+            echo "Build Result                              : ${currentBuild.result}"
+            echo "currentBuild.displayName                  : ${currentBuild.displayName}"
+            echo "currentBuild.fullDisplayName              : ${currentBuild.fullDisplayName}"
+            echo "currentBuild.id                           : ${currentBuild.id}"
+            echo "currentBuild.number                       : ${currentBuild.number}"
+            echo "currentBuild.projectName                  : ${currentBuild.projectName}"
+            echo "currentBuild.description                  : ${currentBuild.description}"
+            echo "currentBuild.duration                     : ${currentBuild.duration}"
+            echo "currentBuild.durationString               : ${currentBuild.durationString}"
+            echo "currentBuild.startTimeInMillis            : ${currentBuild.startTimeInMillis}"
+            echo "currentBuild.timeInMillis                 : ${currentBuild.timeInMillis}"
+            echo "currentBuild.absoluteUrl                  : ${currentBuild.absoluteUrl}"
+            echo "currentBuild.previousBuild                : ${currentBuild.previousBuild}"
+            echo "currentBuild.previousResult               : ${currentBuild.previousResult}"
+            echo "currentBuild.rawBuild                     : ${currentBuild.rawBuild}"
+            echo "currentBuild.result                       : ${currentBuild.result}"
+            echo "currentBuild.buildVariables               : ${currentBuild.buildVariables}"
+            echo "currentBuild.changeSets                   : ${currentBuild.changeSets}"
+            echo "currentBuild.getBuildCauses()             : ${currentBuild.getBuildCauses()}"
+            echo "currentBuild.getBuildCauses().toString()  : ${currentBuild.getBuildCauses().toString()}"
+            echo "#################################################################################"
         }
     }
 }
-            
+
 
 
 
