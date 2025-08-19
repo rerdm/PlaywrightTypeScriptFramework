@@ -1,0 +1,40 @@
+pipeline {
+    agent any // Use any available agent to run the pipeline
+
+    parameters {
+        // Dropdown parameter to select the environment (staging or local)
+        choice(name: 'Environment', choices: ['staging', 'local'], description: 'Select the environment')
+        
+        // String parameter to specify the Playwright tag (e.g., @SMOKE)
+        string(name: 'Tag', defaultValue: '@SMOKE', description: 'Playwright tag, e.g., @SMOKE')
+        
+        // Boolean parameter to decide whether to run tests in headed mode
+        booleanParam(name: 'Headed', defaultValue: false, description: 'Run tests in headed mode?')
+    }
+
+    stages {
+        stage('Run Playwright Tests') { // Stage to execute Playwright tests
+            steps {
+                script {
+                    // Construct the base npm command for running tests based on the selected environment
+                    
+                    def npmCommand = "npm run test:${params.Environment}:tc"
+                    
+                    // Append ":headed" to the command if the Headed parameter is true
+                    if (params.Headed) {
+                        npmCommand = npmCommand + ":headed"
+                    }
+
+                    // Add the specified tag to the command
+                    npmCommand = npmCommand + " \"${params.Tag}\""
+
+                    // Print the constructed command to the console
+                    echo "Running command: ${npmCommand}"
+
+                    // Execute the constructed npm command
+                    //sh "${npmCommand}" // enabeling for running the test
+                }
+            }
+        }
+    }
+}
