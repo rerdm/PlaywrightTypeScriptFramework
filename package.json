@@ -33,6 +33,8 @@
     "test:staging:tag:headed": "cross-env ENV=staging HEADLESS=false playwright test --grep",
 
     "test-table": "ts-node utils/generate-test-table.ts"
+
+    
   },
   "keywords": [],
   "author": "",
