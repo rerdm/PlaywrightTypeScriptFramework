@@ -45,8 +45,7 @@ jobs:
   test_registration:
     name: Smoke Tests 
     # Job deaktiviert with if : false
-    if: false
-
+    
     timeout-minutes: 60
     runs-on: ubuntu-latest
 

@@ -28,7 +28,7 @@ export default defineConfig({
   
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
-    ['html'], 
+    ['html', { outputFolder: 'playwright-report', open: 'never' }], 
     ['allure-playwright', { outputFolder: 'allure-results' }], 
     ['line'],
     //['./utils/custom-reporter.ts'] // Use Playwright template reporter 
@@ -42,11 +42,14 @@ export default defineConfig({
     baseURL: envConfig.baseURL,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'retain-on-failure',
+    // trace: 'on-first-retry' (optional): Captures a trace file on the first retry, which can be useful for debugging.
+    trace: 'on', // Enable trace collection for all tests
     headless: envConfig.headless,
 
     storageState: 'loggedInState.json',
     
+    screenshot: 'only-on-failure', // Capture screenshots only on test failure
+    video: 'retain-on-failure',   // Retain videos only on test failure
   },
 
 
