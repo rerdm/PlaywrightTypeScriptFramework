@@ -17,6 +17,26 @@ pipeline {
     }
 
     stages {
+
+        stage('Display Jenkis variables') { // Stage to install npm dependencies and Playwright browsers
+            steps {
+                script {
+                    echo "#################################################################################"
+                    echo "# JENKINS VARIABLES            ##################################################"
+
+                    echo "Jenkins WORKSPACE variable    : ${env.WORKSPACE}"
+                    echo "Jenkins BUILD_NUMBER          : ${env.BUILD_NUMBER}"
+                    echo "Jenkins JOB_NAME              : ${env.JOB_NAME}"
+                    echo "Jenkins BUILD_ID              : ${env.BUILD_ID}"
+                    echo "Jenkins NODE_NAME             : ${env.NODE_NAME}"
+                    echo "Jenkins EXECUTOR_NUMBER       : ${env.EXECUTOR_NUMBER}"
+                    echo "Jenkins BUILD_URL             : ${env.BUILD_URL}"
+                    echo "Jenkins GIT_COMMIT            : ${env.GIT_COMMIT}"
+                    echo "#################################################################################"
+                }
+            }
+        }
+
         stage('Install Dependencies') { // Stage to install npm dependencies and Playwright browsers
             steps {
                 script {
@@ -54,6 +74,37 @@ pipeline {
                 }
             }
         }
+
+        post {
+            always {
+                echo "#################################################################################"
+                echo "# BUILD INFORMATION  currentBuild.xx                                                           #"
+                echo "#################################################################################"
+                echo "Build Result                              : ${currentBuild.result}"
+                echo "currentBuild.displayName                  : ${currentBuild.displayName}"
+                echo "currentBuild.fullDisplayName              : ${currentBuild.fullDisplayName}"
+                echo "currentBuild.id                           : ${currentBuild.id}"
+                echo "currentBuild.number                       : ${currentBuild.number}"
+                echo "currentBuild.projectName                  : ${currentBuild.projectName}"
+                echo "currentBuild.description                  : ${currentBuild.description}"
+                echo "currentBuild.duration                     : ${currentBuild.duration}"
+                echo "currentBuild.durationString               : ${currentBuild.durationString}"
+                echo "currentBuild.startTimeInMillis            : ${currentBuild.startTimeInMillis}"
+                echo "currentBuild.timeInMillis                 : ${currentBuild.timeInMillis}"
+                echo "currentBuild.absoluteUrl                  : ${currentBuild.absoluteUrl}"
+                echo "currentBuild.previousBuild                : ${currentBuild.previousBuild}"
+                echo "currentBuild.previousResult               : ${currentBuild.previousResult}"
+                echo "currentBuild.rawBuild                     : ${currentBuild.rawBuild}"
+                echo "currentBuild.result                       : ${currentBuild.result}"
+                echo "currentBuild.buildVariables               : ${currentBuild.buildVariables}"
+                echo "currentBuild.changeSets                   : ${currentBuild.changeSets}"
+                echo "currentBuild.getBuildCauses()             : ${currentBuild.getBuildCauses()}"
+                echo "currentBuild.getBuildCauses().toString()  : ${currentBuild.getBuildCauses().toString()}"
+                echo "#################################################################################"
+            }
+        }
     }
 }
+
+
 
