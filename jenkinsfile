@@ -5,12 +5,8 @@ pipeline {
         // Dropdown parameter to select the environment (staging or local)
         choice(name: 'Environment', choices: ['staging', 'local'], description: 'Select the environment')
         
-        // Dropdown parameter to select the environment (staging or local)
+        // Dropdown parameter to select the specific test selection by tag or ALLtests for running all tests
         choice(name: 'Tag', choices: ['@SMOKE','ALLTests'], description: 'Select the specific test selection by tag or ALLtests for running all tests')
-        
-
-        // String parameter to specify the Playwright tag (e.g., @SMOKE)
-        string(name: 'Tag', defaultValue: '@SMOKE', description: 'Playwright tag, e.g., @SMOKE')
         
         // Boolean parameter to decide whether to run tests in headed mode
         booleanParam(name: 'Headed', defaultValue: false, description: 'Run tests in headed mode?')
@@ -105,6 +101,7 @@ pipeline {
         }
     }
 }
+            
 
 
 
