@@ -1,135 +1,94 @@
-
-import { StartPage } from "../pages/StartPage";
-import { LoginPage } from "../pages/LoginPage";
-import { LoggedInPage } from "../pages/LoggedInPage";
-
-
-import MenubarItems from "../components/menubar.component";
 import { test, expect } from '@playwright/test';
-import { loadEnvironmentConfig } from '../utils/environment-config';
-import { StepLogger } from "../utils/StepLogger";
+import { LoginPage } from '../pages/LoginPage';
+import { NavigationPage } from '../pages/NavigationPage';
 
-
-test.describe('Login Page Tests', () => {
-
-
-  let startPage: StartPage;
+test.describe('Login Tests', () => {
   let loginPage: LoginPage;
-  let loggedInPage: LoggedInPage;
-  let menubarItems: MenubarItems;
-  let envConfig = loadEnvironmentConfig();
-  let expectedUrl = envConfig.baseURL;
-  let username = envConfig.Username || 'defaultUser';
-  let password = envConfig.Password || 'defaultPassword';
-  let testSpecName = __filename.split(/[\\/]/).pop() || 'PageNotFound';
-  let stepCount = 0;
-  let testName: string;
+  let navigationPage: NavigationPage;
 
   test.beforeEach(async ({ page }) => {
-
-    startPage = new StartPage(page);
     loginPage = new LoginPage(page);
-    loggedInPage = new LoggedInPage(page);
-    menubarItems = new MenubarItems(page);
-
-   
+    navigationPage = new NavigationPage(page);
+    await loginPage.goto();
   });
 
-  test.beforeAll(async () => {
-    // Load environment configuration
-     const testSpecName = __filename.split(/[\\/]/).pop() || 'PageNotFound';
+  test('should display login form elements @Login-001', async ({ page }) => {
+    // Verify all login form elements are present
+    await expect(loginPage.usernameInput).toBeVisible();
+    await expect(loginPage.passwordInput).toBeVisible();
+    await expect(loginPage.loginButton).toBeVisible();
+    await expect(loginPage.registerLink).toBeVisible();
     
+    // Verify page title and heading
+    await expect(page).toHaveTitle(/Login/);
+    await expect(page.locator('h1')).toContainText('Welcome Back');
   });
 
-  test.afterAll(async () => {
-    // Optionally, you can add cleanup code here if needed
-    // HTML Report wird jetzt global in global-teardown.ts generiert
-    console.log('✅ Login tests completed');
-  });
- 
-  test('Open Website and Login in @LOGIN-001', async ({ page }) => {
-
-    // This test uses fresh session without storage state
-    await page.context().clearCookies();
-    await page.context().clearPermissions();
-    stepCount = 0;
-    testName = test.info().title,
-
-    StepLogger.startTest(testName, envConfig.environment, testSpecName);
-
-    // Step 1
-    stepCount++;
-    await startPage.openUrl(stepCount, expectedUrl, testName);
-
-    // Step 2
-    stepCount++;
-    await menubarItems.LoginButtonClick(stepCount, testName);
-
-    // Step 3
-    stepCount++;
-    await loginPage.UsernameInputField(username,stepCount, testName);
-
-    // Step 4
-    stepCount++;
-    await loginPage.PasswordInputField(password,stepCount, testName);
-
-    // Step 5
-    stepCount++;
-    await loginPage.ClickSubmitButton(stepCount, testName);
-
-
-    // Step 6
-    stepCount++;
-    await loggedInPage.CheckIfLoggedInUsernameIsVisble(stepCount, username, testName);
-
-    StepLogger.testEnd();
-
-
-  });
-
-  test('Open Website and Login in with invalid credentials @LOGIN', async ({ page }) => {
-    // This test uses the logged-in storage state from the config
-
-    // This test uses fresh session without storage state
-    await page.context().clearCookies();
-    await page.context().clearPermissions();
-    stepCount = 0;
-    testName = test.info().title;
+  test('should successfully login with valid credentials @Login-002', async ({ page }) => {
+    // Test data - you may need to adjust these credentials
+    const validUsername = 'tester1';
+    const validPassword = 'passwort1234';
     
-    StepLogger.startTest(testName, envConfig.environment, testSpecName);
+    await loginPage.login(validUsername, validPassword);
     
-    let invalidUsername = 'invalidUser';
-    let invalidPassword = 'invalidPassword';
-
-    // Step 1
-    stepCount++;
-    await startPage.openUrl(stepCount, expectedUrl, testName);
-
-    // Step 
-    stepCount++;
-    await menubarItems.LoginButtonClick(stepCount, testName);
-
-    // Step 3
-    stepCount++;
-    await loginPage.UsernameInputField(invalidUsername, stepCount, testName);
-
-    // Step 4
-    stepCount++;
-    await loginPage.PasswordInputField(invalidPassword, stepCount, testName);
-
-    // Step 5
-    stepCount++;
-    await loginPage.ClickSubmitButton(stepCount, testName);
-
-    // Step 6
-    stepCount++;
-    await loggedInPage.CheckIfLoggedInUsernameIsVisble(stepCount, username, testName);
-
-    StepLogger.testEnd();
-
+    // Verify successful login by checking if redirected and navigation shows logged-in state
+    await navigationPage.waitForNavigation();
+    expect(await navigationPage.isLoggedIn()).toBe(true);
   });
 
+  test('should show error for invalid credentials @Login-003', async ({ page }) => {
+    const invalidUsername = 'tester2';
+    const invalidPassword = 'invalidpassword';
+    
+    await loginPage.login(invalidUsername, invalidPassword);
+    
+    // Verify error is shown and user is not logged in
+    await expect(page.locator('text=error').or(page.locator('.text-red-400'))).toBeVisible({ timeout: 3000 });
+    expect(await navigationPage.isLoggedIn()).toBe(false);
+  });
 
+  test('should show validation error for empty fields @Login-004', async ({ page }) => {
+    await loginPage.loginButton.click();
+    
+    // HTML5 validation should prevent form submission
+    await expect(loginPage.usernameInput).toHaveAttribute('required');
+    await expect(loginPage.passwordInput).toHaveAttribute('required');
+  });
 
+  test('should navigate to register page @Login-001', async ({ page }) => {
+    await loginPage.goToRegister();
+    
+    // Verify navigation to register page
+    await expect(page).toHaveURL(/register\.php/);
+    await expect(page.locator('h1')).toContainText('Create Account');
+  });
 
+  test('should handle registration success popup @Login-005', async ({ page }) => {
+    // Navigate to login page with registration success parameter
+    await page.goto('/testing-website/public/login.php?registered=1');
+    
+    // Verify success popup is visible
+    await expect(page.locator('#successPopup')).toBeVisible();
+    await expect(page.locator('text=Registration Successful!')).toBeVisible();
+    
+    // Click continue button
+    await loginPage.continueAfterSuccess();
+    
+    // Verify popup is closed
+    await expect(page.locator('#successPopup')).not.toBeVisible();
+  });
+
+  test('should auto-close registration success popup @Login-006', async ({ page }) => {
+    // Navigate to login page with registration success parameter
+    await page.goto('/testing-website/public/login.php?registered=1');
+    
+    // Verify popup is visible initially
+    await expect(page.locator('#successPopup')).toBeVisible();
+    
+    // Wait for auto-close (5 seconds + animation)
+    await page.waitForTimeout(6000);
+    
+    // Verify popup is closed
+    await expect(page.locator('#successPopup')).not.toBeVisible();
+  });
 });
