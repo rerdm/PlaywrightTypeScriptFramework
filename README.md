@@ -1,5 +1,14 @@
 # PlaywrightTypeScriptFramework
-Automated end-to-end testing project using Playwright and TypeScript. Tests run via GitHub Actions CI pipeline and generate detailed HTML reports. Ensures application stability by detecting issues early in development.
+Automated end-to-end testing project using Playwright and TypeScript. Tests are executed via GitHub Actions CI pipeline and generate detailed HTML reports. The framework helps ensure application stability by detecting issues early in development.
+
+## Test Object
+This framework tests an ecommerce website developed by myself: [https://rerd.de/testing-website/](https://rerd.de/testing-website/)
+
+Main features covered:
+- User registration and login
+- Add products to cart and place orders
+- Edit user profile data
+- Many additional functionalities for user interaction
 
 ## Table of Contents
 - [Project Structure & Development Guidelines](#project-structure--development-guidelines)

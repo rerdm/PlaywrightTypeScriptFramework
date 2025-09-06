@@ -1,127 +1,98 @@
-import {Locator, Page} from '@playwright/test';
-import BasePage from './BasePage';
+import { Page, Locator } from '@playwright/test';
+import { loadEnvironmentConfig } from '../utils/environment-config';
 import { StepLogger } from "../utils/StepLogger";
 
 
-export class ShopPage extends BasePage {
+export class ShopPage {
+  readonly page: Page;
+  readonly categoryFilter: Locator;
+  readonly sortFilter: Locator;
+  readonly searchInput: Locator;
+  readonly resetFiltersButton: Locator;
+  readonly scrollToTopButton: Locator;
+  readonly resetAllFiltersButton: Locator;
 
-    private searchInputFieldForProducts: Locator;
-    private adTitemToCart: Locator;
+  fileName: string;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.categoryFilter = page.locator('#category_filter');
+    this.sortFilter = page.locator('#sort_filter');
+    this.searchInput = page.locator('#search_input');
+    this.resetFiltersButton = page.locator('#reset_filters_button');
+    this.scrollToTopButton = page.locator('#scroll_to_top_button');
+    this.resetAllFiltersButton = page.locator('#reset_all_filters_button');
+
+    this.fileName = __filename.split(/[\\/]/).pop() || 'PageNotFound';
+
+  }
+
+  async goto() {
+    await this.page.goto('/testing-website/public/shop.php');
+  }
+
+  async filterByCategory(category: string) {
+    await this.categoryFilter.selectOption(category);
+  }
+
+  async sortBy(sortOption: string) {
+    await this.sortFilter.selectOption(sortOption);
+  }
+
+  async searchForProducts(searchTerm: string) {
+    await this.searchInput.fill(searchTerm);
+    // Wait a bit for debounced search
+    await this.page.waitForTimeout(600);
+  }
+
+  async resetFilters() {
+    await this.resetFiltersButton.click();
+  }
+
+  async resetAllFilters() {
+    await this.resetAllFiltersButton.click();
+  }
+
+  async scrollToTop() {
+    await this.scrollToTopButton.click();
+  }
+
+  async getProductQuantityInput(productId: string): Promise<Locator> {
+    return this.page.locator(`#quantity_input_${productId}`);
+  }
+
+  async getAddToCartButton(productId: string): Promise<Locator> {
+    return this.page.locator(`#add_to_cart_button_${productId}`);
+  }
+
+  async addProductToCart(productId: string, quantity: string = '1') {
+    const quantityInput = await this.getProductQuantityInput(productId);
+    const addToCartButton = await this.getAddToCartButton(productId);
     
-    constructor(page: Page) {
-        super(page);
+    await quantityInput.fill(quantity);
+    await addToCartButton.click();
+  }
 
-        this.searchInputFieldForProducts = page.locator("//input[@id='search']");
-        this.adTitemToCart = page.locator("//button[@id='dc-cartbtn']");
+  async getProductCount(): Promise<number> {
+    const productCards = this.page.locator('.bg-gray-800.border.border-gray-700.rounded-2xl');
+    return await productCards.count();
+  }
 
-        // Initialize the fileName variable to the current file name
-        this.fileName = __filename.split(/[\\/]/).pop() || 'PageNotFound';
+  async waitForProductsToLoad() {
+    // Wait for at least one product or no products message
+    await this.page.waitForFunction(() => {
+      const products = document.querySelectorAll('.bg-gray-800.border.border-gray-700.rounded-2xl');
+      const noProductsMessage = document.querySelector('.col-span-full.text-center');
+      return products.length > 0 || noProductsMessage !== null;
+    });
+  }
 
+  async getFirstProductId(): Promise<string | null> {
+    const firstAddToCartButton = this.page.locator('[id^="add_to_cart_button_"]').first();
+    const id = await firstAddToCartButton.getAttribute('id');
+    if (id) {
+      return id.replace('add_to_cart_button_', '');
     }
-
-    async SearchInputFiledForPoducts(searchText: string, stepCount: number, testName: string): Promise<void> {
-
-        const methodName = this.SearchInputFiledForPoducts.name;
-        
-        try {
-            await this.searchInputFieldForProducts.waitFor({ state: 'visible' });
-            await this.searchInputFieldForProducts.click();
-            await this.searchInputFieldForProducts.fill(searchText);
-            await this.page.keyboard.press('Enter', { delay: 1000 });
-
-        
-            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-            await StepLogger.logStepFailed(
-                this.fileName,
-                methodName,
-                testName,
-                stepCount,
-                this.searchInputFieldForProducts
-            );
-
-            StepLogger.testEnd();
-            throw new Error(`ERROR Details : ${errorMessage}`);
-        }
-    }
-
-    async ScrollToCartProduct(product: string, stepCount: number, testName: string): Promise<void> {
-
-        const methodName = this.ScrollToCartProduct.name;
-
-        const productLocator = this.page.locator(`//a[normalize-space()='${product}']`);
-
-
-        try {
-            await productLocator.scrollIntoViewIfNeeded();
-            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-            await StepLogger.logStepFailed(
-                this.fileName,
-                methodName,
-                testName,
-                stepCount,
-                productLocator
-            );
-
-            StepLogger.testEnd();
-            throw new Error(`ERROR Details : ${errorMessage}`);
-        }
-    }
-
-    async ClickShopProduct(product: string, stepCount: number, testName: string): Promise<void> {
-
-        const methodName = this.ClickShopProduct.name;
-
-        const productLocator = this.page.locator(`//a[normalize-space()='${product}']`);
-
-
-        try {
-            await productLocator.scrollIntoViewIfNeeded();
-            await productLocator.click();
-            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-            await StepLogger.logStepFailed(
-                this.fileName,
-                methodName,
-                testName,
-                stepCount,
-                productLocator
-            );
-
-            StepLogger.testEnd();
-            throw new Error(`ERROR Details : ${errorMessage}`);
-        }
-    }
-    async AdItemToCart(stepCount: number, testName: string): Promise<void> {
-
-        const methodName = this.AdItemToCart.name;
-
-        try {
-            await this.adTitemToCart.scrollIntoViewIfNeeded();
-            await this.adTitemToCart.click();
-            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-            await StepLogger.logStepFailed(
-                this.fileName,
-                methodName,
-                testName,
-                stepCount,
-                this.adTitemToCart
-            );
-
-            StepLogger.testEnd();
-            throw new Error(`ERROR Details : ${errorMessage}`);
-        }
-    }
-
-
+    return null;
+  }
 }

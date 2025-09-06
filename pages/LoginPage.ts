@@ -1,139 +1,72 @@
-import {Locator, Page} from '@playwright/test';
-import BasePage from './BasePage';
+import { Page, Locator } from '@playwright/test';
+import { loadEnvironmentConfig } from '../utils/environment-config';
 import { StepLogger } from "../utils/StepLogger";
 
 
-export class LoginPage extends BasePage {
+export class LoginPage {
+  readonly page: Page;
+  readonly usernameInput: Locator;
+  readonly passwordInput: Locator;
+  readonly loginButton: Locator;
+  readonly registerLink: Locator;
+  readonly successContinueButton: Locator;
 
-    private usernameInput: Locator;
-    private passwordInput: Locator;
-    private submitButton: Locator;
-    private logoutButton: Locator;
-    private registrationButton: Locator;
+  fileName: string;
 
-    usernameWrongMsg: Locator;
-    passwordWrongMsg: Locator;
 
-    loginContainer: Locator;
-    header:Locator;
+  constructor(page: Page) {
+    this.page = page;
+    this.usernameInput = page.locator('#username_input');
+    this.passwordInput = page.locator('#password_input');
+    this.loginButton = page.locator('#login_button');
+    this.registerLink = page.locator('#register_link');
+    this.successContinueButton = page.locator('#login_success_continue_button');
 
-    fileName: string;
+    this.fileName = __filename.split(/[\\/]/).pop() || 'PageNotFound';
+
+  }
+
+  async goto() {
+
+
+    await this.page.goto('https://rerd.de/testing-website/login.php');
+  }
+
+  async login(username: string, password: string) {
+    await this.usernameInput.fill(username);
+    await this.passwordInput.fill(password);
+    await this.loginButton.click();
+  }
+
+  async goToRegister() {
+    await this.registerLink.click();
+  }
+
+  async continueAfterSuccess() {
+    await this.successContinueButton.click();
+  }
+
+  async isLoggedIn() {
+    // Check if we're redirected to a different page or see success elements
+    await this.page.waitForURL(/\/(shop|cart|account|index)\.php/, { timeout: 5000 });
+    return true;
+  }
+
+  async hasValidationError() {
+    // Look for common error indicators
+    const errorSelectors = [
+      '.text-red-400',
+      '.text-red-500',
+      '.bg-red-900',
+      '[class*="error"]'
+    ];
     
-    constructor(page: Page) {
-        super(page);
-
-        this.usernameInput = page.locator("//input[@id='login-username-']");
-        this.passwordInput = page.locator("//input[@id='login-password']");
-        this.submitButton = page.locator("//input[@id='login-submit']"); 
-        this.registrationButton = page.locator("//a[normalize-space()='Anmelden']");
-        
-        this.usernameWrongMsg = page.locator("//span[@id='login-username-msg']");
-        this.passwordWrongMsg = page.locator("//span[@id='login-password-msg']");
-
-        this.loginContainer = page.locator('#loginContainer')
-        this.logoutButton = page.locator("//a[normalize-space()='Logout']")
-        this.header = page.locator("'//div[@id='overlay']'")
-
-        // Initialize the fileName variable to the current file name
-        this.fileName = __filename.split(/[\\/]/).pop() || 'PageNotFound';
-
+    for (const selector of errorSelectors) {
+      const element = this.page.locator(selector);
+      if (await element.isVisible()) {
+        return true;
+      }
     }
-    
-    async UsernameInputField(username: string, stepCount: number, testName: string): Promise<void> {
-
-        const methodName = this.UsernameInputField.name;
-
-        try {
-            await this.usernameInput.waitFor({ state: 'visible' });
-            await this.usernameInput.fill(username);
-            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            
-            await StepLogger.logStepFailed(
-                this.fileName, 
-                methodName, 
-                testName, 
-                stepCount, 
-                this.usernameInput
-            );
-            
-            StepLogger.testEnd();
-            throw new Error(`Failed to fill username field: ${errorMessage}`);
-        }
-    }
-
-    async PasswordInputField(password: string, stepCount: number, testName: string): Promise<void> {
-
-        const methodName = this.PasswordInputField.name;
-
-        try {
-            await this.passwordInput.waitFor({ state: 'visible' });
-            await this.passwordInput.fill(password);
-            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            
-            await StepLogger.logStepFailed(
-                this.fileName, 
-                methodName, 
-                testName, 
-                stepCount, 
-                this.passwordInput
-            );
-            
-            StepLogger.testEnd();
-            throw new Error(`ERROR Details : ${errorMessage}`);
-        }
-    }
-
-    async ClickSubmitButton(stepCount: number, testName: string): Promise<void> {
-
-        const methodName = this.ClickSubmitButton.name;
-        
-
-        try {
-            await this.submitButton.waitFor({ state: 'visible' });
-            await this.submitButton.click({ timeout: 10000 });
-            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            
-            await StepLogger.logStepFailed(
-                this.fileName, 
-                methodName, 
-                testName, 
-                stepCount, 
-                this.submitButton
-            );
-            
-            StepLogger.testEnd();
-            throw new Error(`ERROR Details : ${errorMessage}`);
-        }
-    }
-
-    async ClickRegistrationButton(stepCount: number, testName: string): Promise<void> {
-        
-        const methodName = this.ClickRegistrationButton.name;
-
-        try {
-            await this.registrationButton.waitFor({ state: 'visible' });
-            await this.registrationButton.click({ timeout: 10000 });
-            await StepLogger.logStepSuccess(this.fileName, methodName, testName, stepCount);
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-            await StepLogger.logStepFailed(
-                this.fileName,
-                methodName,
-                testName,
-                stepCount,
-                this.registrationButton
-            );
-
-            StepLogger.testEnd();
-            throw new Error(`ERROR Details : ${errorMessage}`);
-        }
-    }
-
+    return false;
+  }
 }
