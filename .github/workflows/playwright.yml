@@ -42,8 +42,8 @@ jobs:
           retention-days: 30
 
 
-  test_registration:
-    name: Smoke Tests 
+  test_login:
+    name:  Test Login-002
     # Job deaktiviert with if : false
     
     timeout-minutes: 60
@@ -61,12 +61,9 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install
 
-    - name: pm run test:staging:tc "@SMOKE"
-      # Führt alle Teste in der staging umgebung aus mit den Tags @STAGING und @Registration
-      # staging wird automatisch mit headless=true ausgeführt
-      # Diese Tags müssen in dem Testfile vorhanden sein
-      # run: npm run test:staging:tag "@STAGING @Registration"
-      run: npm run test:staging:tc "@SMOKE"
+    - name: npm run test:prod:tc "@Login-002"
+
+      run: npm run test:prod:tc "@Login-002"
 
     - name: Generate Allure Report
       if: ${{ !cancelled() }}
