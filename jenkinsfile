@@ -67,6 +67,8 @@ pipeline {
                     // Execute the constructed npm command using 'bat' for Windows
                     bat "${npmCommand}" // Windows
                     // sh "${npmCommand}" // Linux
+                    // Send test report email after tests
+                    bat 'node utils/generateTestEmailReport.js'
                 }
             }
         }

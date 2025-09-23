@@ -14,10 +14,12 @@ test.describe('Login Tests', () => {
 
   test('should display login form elements @Login-001', async ({ page }) => {
     // Verify all login form elements are present
-    await expect(loginPage.usernameInput).toBeVisible();
-    await expect(loginPage.passwordInput).toBeVisible();
-    await expect(loginPage.loginButton).toBeVisible();
-    await expect(loginPage.registerLink).toBeVisible();
+
+    await loginPage.expectLoginFormVisible();
+    //await expect(loginPage.usernameInput).toBeVisible();
+    //await expect(loginPage.passwordInput).toBeVisible();
+    //await expect(loginPage.loginButton).toBeVisible();
+    //await expect(loginPage.registerLink).toBeVisible();
     
     // Verify page title and heading
     await expect(page).toHaveTitle(/Login/);
