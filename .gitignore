@@ -1,4 +1,3 @@
-node_modules/
 /test-results/
 /playwright-report/
 /blob-report/
@@ -28,3 +27,6 @@ eslint-reports/
 
 /archive/
 
+versions/PlaywrightTypeScriptFrameworkv1.7z
+versions/
+node_modules

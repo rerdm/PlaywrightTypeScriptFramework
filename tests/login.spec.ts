@@ -38,7 +38,7 @@ test.describe('Login Tests', () => {
     expect(await navigationPage.isLoggedIn()).toBe(true);
   });
 
-  test('should show error for invalid credentials @Login-003', async ({ page }) => {
+  test('should show error for invalid credentials @SMOKE', async ({ page }) => {
     const invalidUsername = 'tester2';
     const invalidPassword = 'invalidpassword';
     
