@@ -59,20 +59,20 @@ pipeline {
             }
         }
 
-        // stage('Send Test Report Email') {
-        //     steps {
-        //         script {
-        //             echo "Sende Test Report Email..."
-        //             try {
-        //                 bat 'node utils/generateTestEmailReport.js'
-        //             } catch (err) {
-        //                 echo "[ERROR] Test Report Email konnte nicht gesendet werden: ${err}"
-        //                 currentBuild.result = 'FAILURE'
-        //                 throw err
-        //             }
-        //         }
-        //     }
-        //}
+        stage('Send Test Report Email') {
+            steps {
+                script {
+                    echo "Sende Test Report Email..."
+                    try {
+                        bat 'node utils/generateTestEmailReport.js'
+                    } catch (err) {
+                        echo "[ERROR] Test Report Email konnte nicht gesendet werden: ${err}"
+                        currentBuild.result = 'FAILURE'
+                        throw err
+                    }
+                }
+            }
+        }
     }
 
     post {
