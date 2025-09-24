@@ -48,6 +48,8 @@ pipeline {
                     echo "Running command: ${npmCommand}"
                     try {
                         bat "${npmCommand}"
+                            // Playwright Report als Artifact archivieren
+                            archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
                     } catch (err) {
                         echo "[ERROR] Playwright Tests failed: ${err}"
                         currentBuild.result = 'FAILURE'

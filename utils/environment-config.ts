@@ -19,7 +19,7 @@ export interface EnvironmentConfig {
 export function loadEnvironmentConfig(env?: string): EnvironmentConfig {
     
   // Determine environment from parameter, environment variable, or default to 'local'
-  const environment = env || process.env.ENV || process.env.ENVIRONMENT || 'local';
+  const environment = env || process.env.ENV || process.env.ENVIRONMENT || 'prod';
   
   // Load environment file
   const envFile = `.env.${environment}`;
@@ -37,8 +37,8 @@ export function loadEnvironmentConfig(env?: string): EnvironmentConfig {
     environment,
     baseURL: process.env.BASE_URL || getDefaultBaseURL(environment),
     headless: process.env.HEADLESS === 'true',
-    Username: process.env.APP_USERNAME || 'defaultUser',
-    Password: process.env.PASSWORD || 'defaultPassword',
+    // Username: process.env.APP_USERNAME || 'defaultUser',
+    // Password: process.env.PASSWORD || 'defaultPassword',
   };
 
   //console.log(`Environment: ${config.environment}`);
@@ -53,12 +53,10 @@ export function loadEnvironmentConfig(env?: string): EnvironmentConfig {
  */
 function getDefaultBaseURL(environment: string): string {
     switch (environment) {
-        case 'local':
-            return 'http://10.40.226.38/coffeeshop/index.php';
-        case 'staging':
-            return 'https://marina-abr.github.io/StaticCoffee/index.html';
+        case 'prod':
+            return 'https://rerd.de/testing-website/';
         default:
-            return 'http://10.40.226.38/coffeeshop/index.php';
+            return 'https://rerd.de/testing-website/';
     }
 }
 
