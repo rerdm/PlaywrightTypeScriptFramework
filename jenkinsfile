@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     parameters {
-        choice(name: 'Environment', choices: ['staging', 'local'], description: 'Select the environment')
-        choice(name: 'Tag', choices: ['@SMOKE','ALLTests'], description: 'Select the specific test selection by tag or ALLtests for running all tests')
+        choice(name: 'Environment', choices: ['prod'], description: 'Select the environment')
+        choice(name: 'Tag', choices: ['@SMOKE','@LOGIN','@REGISTRATION','@ECOMMERCE'], description: 'Select the specific test selection by tag or ALLtests for running all tests')
         booleanParam(name: 'Headed', defaultValue: false, description: 'Run tests in headed mode?')
     }
 
