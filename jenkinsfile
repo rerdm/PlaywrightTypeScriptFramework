@@ -1,25 +1,18 @@
 pipeline {
-    agent any // Use any available agent to run the pipeline
+    agent any
 
     parameters {
-        // Dropdown parameter to select the environment (staging or local)
         choice(name: 'Environment', choices: ['staging', 'local'], description: 'Select the environment')
-        
-        // Dropdown parameter to select the specific test selection by tag or ALLtests for running all tests
         choice(name: 'Tag', choices: ['@SMOKE','ALLTests'], description: 'Select the specific test selection by tag or ALLtests for running all tests')
-        
-        // Boolean parameter to decide whether to run tests in headed mode
         booleanParam(name: 'Headed', defaultValue: false, description: 'Run tests in headed mode?')
     }
 
     stages {
-
-        stage('Display Jenkis variables') { // Stage to install npm dependencies and Playwright browsers
+        stage('Display Jenkis variables') {
             steps {
                 script {
                     echo "#################################################################################"
                     echo "# JENKINS VARIABLES            ##################################################"
-
                     echo "Jenkins WORKSPACE variable    : ${env.WORKSPACE}"
                     echo "Jenkins BUILD_NUMBER          : ${env.BUILD_NUMBER}"
                     echo "Jenkins JOB_NAME              : ${env.JOB_NAME}"
@@ -33,64 +26,54 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') { // Stage to install npm dependencies and Playwright browsers
+        stage('Install Dependencies') {
             steps {
                 script {
-                    // Install npm dependencies
                     bat 'npm install'
-                    // Install Playwright browsers
                     bat 'npx playwright install'
                 }
             }
         }
 
-        stage('Run Playwright Tests') { // Stage to execute Playwright tests
+        stage('Run Playwright Tests') {
             steps {
                 script {
-                    // Construct the base npm command for running tests based on the selected environment
                     def npmCommand = "npm run test:${params.Environment}:tc"
-                    
-                    // Append ":headed" to the command if the Headed parameter is true
                     if (params.Headed) {
                         npmCommand = npmCommand + ":headed"
                     }
-
-                    // Add the specified tag to the command
-
                     if (params.Tag != 'ALLtests') {
                         npmCommand = npmCommand + " \"${params.Tag}\""
                     }
-
-                    // Print the constructed command to the console
                     echo "Running command: ${npmCommand}"
-                            try {
-                                bat "${npmCommand}" // Windows
-                            } catch (err) {
-                                echo "[ERROR] Playwright Tests failed: ${err}"
-                                currentBuild.result = 'FAILURE'
-                                throw err
-                            }
-                    bat 'node utils/generateTestEmailReport.js'
-                }
-            }
-                stage('Send Test Report Email') {
-                    steps {
-                        script {
-                            echo "Sende Test Report Email..."
-                            try {
-                                bat 'node utils/generateTestEmailReport.js'
-                            } catch (err) {
-                                echo "[ERROR] Test Report Email konnte nicht gesendet werden: ${err}"
-                                currentBuild.result = 'FAILURE'
-                                throw err
-                            }
-                        }
+                    try {
+                        bat "${npmCommand}"
+                    } catch (err) {
+                        echo "[ERROR] Playwright Tests failed: ${err}"
+                        currentBuild.result = 'FAILURE'
+                        throw err
                     }
                 }
+            }
+        }
+
+        stage('Send Test Report Email') {
+            steps {
+                script {
+                    echo "Sende Test Report Email..."
+                    try {
+                        bat 'node utils/generateTestEmailReport.js'
+                    } catch (err) {
+                        echo "[ERROR] Test Report Email konnte nicht gesendet werden: ${err}"
+                        currentBuild.result = 'FAILURE'
+                        throw err
+                    }
+                }
+            }
         }
     }
 
-    post { // Ensure this is correctly positioned at the pipeline level
+    post {
         always {
             echo "#################################################################################"
             echo "# BUILD INFORMATION  currentBuild.xx                                           #"
@@ -113,7 +96,3 @@ pipeline {
         }
     }
 }
-
-
-
-
