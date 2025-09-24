@@ -12,7 +12,7 @@ test.describe('Login Tests', () => {
     await loginPage.goto();
   });
 
-  test('should display login form elements @Login-001', async ({ page }) => {
+  test('should display login form elements @SMOKE', async ({ page }) => {
     // Verify all login form elements are present
 
     await loginPage.expectLoginFormVisible();
