@@ -12,7 +12,7 @@ test.describe('Login Tests', () => {
     await loginPage.goto();
   });
 
-  test('should display login form elements @SMOKE', async ({ page }) => {
+  test('should display login form elements @LOGIN-001', async ({ page }) => {
     // Verify all login form elements are present
 
     await loginPage.expectLoginFormVisible();
@@ -26,7 +26,7 @@ test.describe('Login Tests', () => {
     await expect(page.locator('h1')).toContainText('Welcome Back');
   });
 
-  test('should successfully login with valid credentials @Login-002', async ({ page }) => {
+  test('should successfully login with valid credentials @SMOKE', async ({ page }) => {
     // Test data - you may need to adjust these credentials
     const validUsername = 'tester1';
     const validPassword = 'passwort1234';
@@ -38,7 +38,7 @@ test.describe('Login Tests', () => {
     expect(await navigationPage.isLoggedIn()).toBe(true);
   });
 
-  test('should show error for invalid credentials @SMOKE', async ({ page }) => {
+  test('should show error for invalid credentials', async ({ page }) => {
     const invalidUsername = 'tester2';
     const invalidPassword = 'invalidpassword';
     
