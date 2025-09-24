@@ -62,15 +62,25 @@ pipeline {
         stage('Send Test Report Email') {
             steps {
                 script {
-                    echo "Sende Test Report Email..."
-                    try {
-                        bat 'node utils/generateTestEmailReport.js'
-                    } catch (err) {
-                        echo "[ERROR] Test Report Email konnte nicht gesendet werden: ${err}"
-                        currentBuild.result = 'FAILURE'
-                        throw err
+                   if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
+                        echo "Tests passed, sending success email."
+                        emailSubject = "Test Execution Success: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+                    } else {
+                        echo "Tests failed, sending failure email."
+                        emailSubject = "Test Execution Failure: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
                     }
-                }
+
+                    mailBody = """Der Jenkins Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'
+                    wurde abgeschlossen.
+                    Build URL: ${env.BUILD_URL}
+                    Environment: ${params.Environment}
+                    """
+
+            emailext (
+                to: "reneerdmann87@web.de",
+                subject: emailSubject,
+                body: emailBody
+                )
             }
         }
     }
