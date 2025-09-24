@@ -34,31 +34,39 @@ function parseTestResults(): {
 }
 
 export async function sendTestReportEmail() {
-  const { summary, details, status } = parseTestResults();
-  const subject = `E2E Test ${status}`;
-  const body = `Test Summary:\n${summary}\n\nDetails:\n${details}`;
+  try {
+    const { summary, details, status } = parseTestResults();
+    const subject = `E2E Test ${status}`;
+    const body = `Test Summary:\n${summary}\n\nDetails:\n${details}`;
 
-  // Configure nodemailer (use SMTP, e.g. Gmail, Outlook, etc.)
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.web.de', // e.g. smtp.gmail.com
-    port: 587,
-    secure: false,
-    auth: {
-      user: 'reneerdmann87@web.de',
-      pass: 'F*biTTer54-',
-    },
-  });
+    // Configure nodemailer (use SMTP, e.g. Gmail, Outlook, etc.)
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.web.de', // e.g. smtp.gmail.com
+      port: 587,
+      secure: false,
+      auth: {
+        user: 'reneerdmann87@web.de',
+        pass: 'F*biTTer54-',
+      },
+    });
 
-  await transporter.sendMail({
-    from: 'Test Automation <DEIN_SMTP_USER>',
-    to: recipientEmail,
-    subject,
-    text: body,
-  });
-  console.log('Test report email sent.');
+    await transporter.sendMail({
+      from: 'Test Automation <DEIN_SMTP_USER>',
+      to: recipientEmail,
+      subject,
+      text: body,
+    });
+    console.log('Test report email sent.');
+  } catch (err) {
+    console.error('[ERROR] Fehler beim Senden des Test-Reports:', err);
+    throw err;
+  }
 }
 
 // For CLI usage
 if (require.main === module) {
-  sendTestReportEmail().catch(console.error);
+  sendTestReportEmail().catch((err) => {
+    console.error('[ERROR] Fehler beim Ausführen von sendTestReportEmail:', err);
+    process.exit(1);
+  });
 }
