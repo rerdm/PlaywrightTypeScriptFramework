@@ -44,10 +44,6 @@ export async function sendTestReportEmail() {
       host: 'smtp.web.de', // e.g. smtp.gmail.com
       port: 587,
       secure: false,
-      auth: {
-        user: 'reneerdmann87@web.de',
-        pass: 'F*biTTer54-',
-      },
     });
 
     await transporter.sendMail({
