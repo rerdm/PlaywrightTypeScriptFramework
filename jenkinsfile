@@ -3,12 +3,12 @@ pipeline {
 
     parameters {
         choice(name: 'Environment', choices: ['prod'], description: 'Select the environment')
-        choice(name: 'Tag', choices: ['@SMOKE','@LOGIN','@REGISTRATION','@ECOMMERCE'], description: 'Select the specific test selection by tag or ALLtests for running all tests')
+        choice(name: 'Tag', choices: ['ALLtests','@SMOKE','@LOGIN','@REGISTRATION','@ECOMMERCE'], description: 'Select the specific test selection by tag or ALLtests for running all tests')
         booleanParam(name: 'Headed', defaultValue: false, description: 'Run tests in headed mode?')
     }
 
     stages {
-        stage('Display Jenkis variables') {
+        stage('Display Jenkins variables') {
             steps {
                 script {
                     echo "#################################################################################"
@@ -48,12 +48,15 @@ pipeline {
                     echo "Running command: ${npmCommand}"
                     try {
                         bat "${npmCommand}"
-                            // Playwright Report als Artifact archivieren
-                            archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
+                        // Playwright Report als Artifact archivieren
+                        archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
                     } catch (err) {
                         echo "[ERROR] Playwright Tests failed: ${err}"
                         currentBuild.result = 'FAILURE'
-                        throw err
+                        // Playwright Report auch bei Fehlern archivieren
+                        archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
+                        // Exception nicht weiterwerfen, damit E-Mail-Stage ausgeführt wird
+                        // throw err
                     }
                 }
             }
@@ -62,7 +65,10 @@ pipeline {
         stage('Send Test Report Email') {
             steps {
                 script {
-                   if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
+                    def emailSubject
+                    def mailBody
+                    
+                    if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
                         echo "Tests passed, sending success email."
                         emailSubject = "Test Execution Success: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
                     } else {
@@ -71,16 +77,22 @@ pipeline {
                     }
 
                     mailBody = """Der Jenkins Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'
-                    wurde abgeschlossen.
-                    Build URL: ${env.BUILD_URL}
-                    Environment: ${params.Environment}
-                    """
+wurde abgeschlossen.
 
-            emailext (
-                to: "reneerdmann87@web.de",
-                subject: emailSubject,
-                body: emailBody
-                )
+Build Status: ${currentBuild.result ?: 'SUCCESS'}
+Build URL: ${env.BUILD_URL}
+Environment: ${params.Environment}
+Test Tags: ${params.Tag}
+Headed Mode: ${params.Headed}
+"""
+
+                    emailext (
+                        to: "reneerdmann87@web.de",
+                        subject: emailSubject,
+                        body: mailBody,
+                        attachmentsPattern: 'playwright-report/**'
+                    )
+                }
             }
         }
     }
@@ -105,6 +117,22 @@ pipeline {
             echo "currentBuild.getBuildCauses()             : ${currentBuild.getBuildCauses()}"
             echo "currentBuild.getBuildCauses().toString()  : ${currentBuild.getBuildCauses().toString()}"
             echo "#################################################################################"
+            
+            // Cleanup - optional
+            cleanWs()
+        }
+        
+        success {
+            echo "Build completed successfully!"
+        }
+        
+        failure {
+            echo "Build failed!"
+            // Hier könnten zusätzliche Failure-Aktionen stehen
+        }
+        
+        unstable {
+            echo "Build is unstable!"
         }
     }
 }
