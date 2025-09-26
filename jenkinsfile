@@ -5,16 +5,6 @@ pipeline {
         choice(name: 'Environment', choices: ['prod'], description: 'Select the environment')
         choice(name: 'Tag', choices: ['ALLtests','@SMOKE','@LOGIN','@REGISTRATION','@ECOMMERCE'], description: 'Select the specific test selection by tag or ALLtests for running all tests')
         booleanParam(name: 'Headed', defaultValue: false, description: 'Run tests in headed mode?')
-        gitParameter(
-            name: 'Branch',
-            type: 'PT_BRANCH',
-            defaultValue: 'master',
-            description: 'Select the Git branch to build',
-            branchFilter: 'origin/*',
-            sortMode: 'ASCENDING',
-            selectedValue: 'DEFAULT',
-            quickFilterEnabled: true
-        )
     }
 
     stages {
