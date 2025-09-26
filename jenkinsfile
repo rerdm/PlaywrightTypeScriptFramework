@@ -12,6 +12,7 @@ pipeline {
                     description: 'Choose a branch to checkout',
                     selectedValue: 'DEFAULT',
                     sortMode: 'DESCENDING_SMART'
+                    useRepository: 'https://github.com/rerdm/PlaywrightTypeScriptFramework.git'
         }
 
     stages {
