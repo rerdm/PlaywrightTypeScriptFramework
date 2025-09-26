@@ -5,6 +5,7 @@ pipeline {
         choice(name: 'Environment', choices: ['prod'], description: 'Select the environment')
         choice(name: 'Tag', choices: ['ALLtests','@SMOKE','@LOGIN','@REGISTRATION','@ECOMMERCE'], description: 'Select the specific test selection by tag or ALLtests for running all tests')
         booleanParam(name: 'Headed', defaultValue: false, description: 'Run tests in headed mode?')
+        choice(name: 'Branch', choices: getGitBranches(), description: 'Select the Git branch to test') // Dynamische Branch-Auswahl
     }
 
     stages {
@@ -22,6 +23,15 @@ pipeline {
                     echo "Jenkins BUILD_URL             : ${env.BUILD_URL}"
                     echo "Jenkins GIT_COMMIT            : ${env.GIT_COMMIT}"
                     echo "#################################################################################"
+                }
+            }
+        }
+
+        stage('Checkout Branch') {
+            steps {
+                script {
+                    echo "Checking out branch: ${params.Branch}"
+                    checkout([$class: 'GitSCM', branches: [[name: "*/${params.Branch}"]], userRemoteConfigs: [[url: 'https://github.com/rerdm/PlaywrightTypeScriptFramework.git']]])
                 }
             }
         }
@@ -55,8 +65,6 @@ pipeline {
                         currentBuild.result = 'FAILURE'
                         // Playwright Report auch bei Fehlern archivieren
                         archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
-                        // Exception nicht weiterwerfen, damit E-Mail-Stage ausgeführt wird
-                        // throw err
                     }
                 }
             }
@@ -67,7 +75,7 @@ pipeline {
                 script {
                     def emailSubject
                     def mailBody
-                    
+
                     if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
                         echo "Tests passed, sending success email."
                         emailSubject = "Test Execution Success: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
@@ -117,22 +125,33 @@ Headed Mode: ${params.Headed}
             echo "currentBuild.getBuildCauses()             : ${currentBuild.getBuildCauses()}"
             echo "currentBuild.getBuildCauses().toString()  : ${currentBuild.getBuildCauses().toString()}"
             echo "#################################################################################"
-            
+
             // Cleanup - optional
             cleanWs()
         }
-        
+
         success {
             echo "Build completed successfully!"
         }
-        
+
         failure {
             echo "Build failed!"
             // Hier könnten zusätzliche Failure-Aktionen stehen
         }
-        
+
         unstable {
             echo "Build is unstable!"
         }
     }
+}
+
+// Funktion, um Git-Branches dynamisch abzurufen
+def getGitBranches() {
+    def branches = []
+    def process = "git ls-remote --heads https://github.com/rerdm/PlaywrightTypeScriptFramework.git".execute()
+    process.text.eachLine { line ->
+        def branch = line.split()[1].replaceAll('refs/heads/', '')
+        branches.add(branch)
+    }
+    return branches
 }
