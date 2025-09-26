@@ -5,7 +5,14 @@ pipeline {
         choice(name: 'Environment', choices: ['prod'], description: 'Select the environment')
         choice(name: 'Tag', choices: ['ALLtests','@SMOKE','@LOGIN','@REGISTRATION','@ECOMMERCE'], description: 'Select the specific test selection by tag or ALLtests for running all tests')
         booleanParam(name: 'Headed', defaultValue: false, description: 'Run tests in headed mode?')
-    }
+        gitParameter type: 'PT_BRANCH',
+                    name: 'A_BRANCH',
+                    branchFilter: 'origin/(.*)',
+                    defaultValue: 'master',
+                    description: 'Choose a branch to checkout',
+                    selectedValue: 'DEFAULT',
+                    sortMode: 'DESCENDING_SMART'
+        }
 
     stages {
         stage('Display Jenkins variables') {
