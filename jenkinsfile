@@ -5,7 +5,6 @@ pipeline {
         choice(name: 'Environment', choices: ['prod'], description: 'Select the environment')
         choice(name: 'Tag', choices: ['ALLtests','@SMOKE','@LOGIN','@REGISTRATION','@ECOMMERCE'], description: 'Select the specific test selection by tag or ALLtests for running all tests')
         booleanParam(name: 'Headed', defaultValue: false, description: 'Run tests in headed mode?')
-        choice(name: 'Branch', choices: getGitBranches(), description: 'Select the Git branch to test') // Dynamische Branch-Auswahl
     }
 
     stages {
@@ -143,15 +142,4 @@ Headed Mode: ${params.Headed}
             echo "Build is unstable!"
         }
     }
-}
-
-// Funktion, um Git-Branches dynamisch abzurufen
-def getGitBranches() {
-    def branches = []
-    def process = "git ls-remote --heads https://github.com/rerdm/PlaywrightTypeScriptFramework.git".execute()
-    process.text.eachLine { line ->
-        def branch = line.split()[1].replaceAll('refs/heads/', '')
-        branches.add(branch)
-    }
-    return branches
 }
