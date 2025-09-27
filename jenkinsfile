@@ -1,43 +1,30 @@
 pipeline {
     agent any
-
     parameters {
-        choice(name: 'Environment', choices: ['prod'], description: 'Select the environment')
-        choice(name: 'Tag', choices: ['ALLtests','@SMOKE','@LOGIN','@REGISTRATION','@ECOMMERCE'], description: 'Select the specific test selection by tag or ALLtests for running all tests')
-        booleanParam(name: 'Headed', defaultValue: false, description: 'Run tests in headed mode?')
-        gitParameter branchFilter: 'origin/(.*)', defaultValue: 'master', name: 'BRANCH', type: 'PT_BRANCH'
-
-        }
-
+        gitParameter branchFilter: '.*', 
+                     defaultValue: 'master', 
+                     name: 'BRANCH_NAME', 
+                     type: 'PT_BRANCH', 
+                     description: 'Wähle einen Branch aus'
+        choice(name: 'Environment', choices: ['prod'], defaultValue: 'prod', description: 'Testumgebung (prod oder test)')
+        choice(name: 'Tag', choices: ['@SMOKE','@LOGIN','@LOGIN@','@REGISTRATION','@ECOMMERCE','ALLtests'] defaultValue: '@SMOKE', description: 'Test-Tag')
+    }
     stages {
-        stage('Display Jenkins variables') {
-            steps {
-                script {
-                    echo "#################################################################################"
-                    echo "# JENKINS VARIABLES            ##################################################"
-                    echo "Jenkins WORKSPACE variable    : ${env.WORKSPACE}"
-                    echo "Jenkins BUILD_NUMBER          : ${env.BUILD_NUMBER}"
-                    echo "Jenkins JOB_NAME              : ${env.JOB_NAME}"
-                    echo "Jenkins BUILD_ID              : ${env.BUILD_ID}"
-                    echo "Jenkins NODE_NAME             : ${env.NODE_NAME}"
-                    echo "Jenkins EXECUTOR_NUMBER       : ${env.EXECUTOR_NUMBER}"
-                    echo "Jenkins BUILD_URL             : ${env.BUILD_URL}"
-                    echo "Jenkins GIT_COMMIT            : ${env.GIT_COMMIT}"
-                    echo "Checking out branch:          : ${params.BRANCH}"
-                    echo "#################################################################################"
-                }
-            }
-        }
-
         stage('Checkout Branch') {
             steps {
                 script {
-                    echo "Checking out branch: ${params.BRANCH}"
-                    checkout([$class: 'GitSCM', branches: [[name: "*/${params.BRANCH}"]], userRemoteConfigs: [[url: 'https://github.com/rerdm/PlaywrightTypeScriptFramework.git']]])
+                    // branchName = letzter Teil (z. B. "feature-branch")
+                    def branchName = params.BRANCH_NAME.tokenize('/').last()
+                    echo "Checking out branch: ${branchName}"
+
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: "*/${branchName}"]],
+                        userRemoteConfigs: [[url: 'https://github.com/rerdm/PlaywrightTypeScriptFramework.git']]
+                    ])
                 }
             }
         }
-
         stage('Install Dependencies') {
             steps {
                 script {
@@ -46,7 +33,6 @@ pipeline {
                 }
             }
         }
-
         stage('Run Playwright Tests') {
             steps {
                 script {
@@ -71,78 +57,20 @@ pipeline {
                 }
             }
         }
-
-        stage('Send Test Report Email') {
+        stage('Create and Upload ZIP Artifact') {
             steps {
                 script {
-                    def emailSubject
-                    def mailBody
+                    def timestamp = new Date().format("yyyy-MM-dd_HH-mm")
+                    def zipFileName = "playwright-report_${timestamp}.zip"
 
-                    if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
-                        echo "Tests passed, sending success email."
-                        emailSubject = "Test Execution Success: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
-                    } else {
-                        echo "Tests failed, sending failure email."
-                        emailSubject = "Test Execution Failure: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
-                    }
+                    echo "Creating ZIP file: ${zipFileName}"
+                    bat "powershell Compress-Archive -Path playwright-report/* -DestinationPath ${zipFileName}"
 
-                    mailBody = """Der Jenkins Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'
-wurde abgeschlossen.
-
-Build Status: ${currentBuild.result ?: 'SUCCESS'}
-Build URL: ${env.BUILD_URL}
-Environment: ${params.Environment}
-Test Tags: ${params.Tag}
-Headed Mode: ${params.Headed}
-"""
-
-                    emailext (
-                        to: "reneerdmann87@web.de",
-                        subject: emailSubject,
-                        body: mailBody,
-                        attachmentsPattern: 'playwright-report/**'
-                    )
+                    echo "Archiving ZIP file: ${zipFileName}"
+                    archiveArtifacts artifacts: zipFileName, allowEmptyArchive: false
                 }
             }
         }
     }
-
-    post {
-        always {
-            echo "#################################################################################"
-            echo "# BUILD INFORMATION  currentBuild.xx                                           #"
-            echo "#################################################################################"
-            echo "Build Result                              : ${currentBuild.result}"
-            echo "currentBuild.displayName                  : ${currentBuild.displayName}"
-            echo "currentBuild.fullDisplayName              : ${currentBuild.fullDisplayName}"
-            echo "currentBuild.id                           : ${currentBuild.id}"
-            echo "currentBuild.number                       : ${currentBuild.number}"
-            echo "currentBuild.projectName                  : ${currentBuild.projectName}"
-            echo "currentBuild.description                  : ${currentBuild.description}"
-            echo "currentBuild.duration                     : ${currentBuild.duration}"
-            echo "currentBuild.durationString               : ${currentBuild.durationString}"
-            echo "currentBuild.startTimeInMillis            : ${currentBuild.startTimeInMillis}"
-            echo "currentBuild.timeInMillis                 : ${currentBuild.timeInMillis}"
-            echo "currentBuild.absoluteUrl                  : ${currentBuild.absoluteUrl}"
-            echo "currentBuild.getBuildCauses()             : ${currentBuild.getBuildCauses()}"
-            echo "currentBuild.getBuildCauses().toString()  : ${currentBuild.getBuildCauses().toString()}"
-            echo "#################################################################################"
-
-            // Cleanup - optional
-            cleanWs()
-        }
-
-        success {
-            echo "Build completed successfully!"
-        }
-
-        failure {
-            echo "Build failed!"
-            // Hier könnten zusätzliche Failure-Aktionen stehen
-        }
-
-        unstable {
-            echo "Build is unstable!"
-        }
-    }
 }
+
