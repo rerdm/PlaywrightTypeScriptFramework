@@ -31,8 +31,8 @@ pipeline {
         stage('Checkout Branch') {
             steps {
                 script {
-                    echo "Checking out branch: ${params.Branch}"
-                    checkout([$class: 'GitSCM', branches: [[name: "*/${params.Branch}"]], userRemoteConfigs: [[url: 'https://github.com/rerdm/PlaywrightTypeScriptFramework.git']]])
+                    echo "Checking out branch: ${params.BRANCH}"
+                    checkout([$class: 'GitSCM', branches: [[name: "*/${params.BRANCH}"]], userRemoteConfigs: [[url: 'https://github.com/rerdm/PlaywrightTypeScriptFramework.git']]])
                 }
             }
         }
