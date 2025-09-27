@@ -23,6 +23,7 @@ pipeline {
                     echo "Jenkins EXECUTOR_NUMBER       : ${env.EXECUTOR_NUMBER}"
                     echo "Jenkins BUILD_URL             : ${env.BUILD_URL}"
                     echo "Jenkins GIT_COMMIT            : ${env.GIT_COMMIT}"
+                    echo "Checking out branch:          : ${params.BRANCH}"
                     echo "#################################################################################"
                 }
             }
