@@ -6,7 +6,7 @@ const filePath = path.join(__dirname, 'test-results', 'failed-tests.json');
 const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
 
 data.forEach(test => {
-  const result = test.result.padEnd(10);e
+  const result = test.result.padEnd(10);
   const testName = test.testName.padEnd(50);
   const specName = test.specName; 
   output += `      ${result} - ${testName} - ${specName}\n`;
