@@ -9,9 +9,9 @@ let output = '';
 
 data.forEach(test => {
   const result = test.result.padEnd(10);
-  const testName = test.testName.padEnd(50);
+  const testName = test.testName.padEnd(59);
   const specName = test.specName; 
-  output += `      ${result} - ${testName} - ${specName}\n`;
+  output += `${result} - ${testName} - ${specName}\n`;
 });
 
 const outputFilePath = path.join(__dirname, 'test-results', 'formatted-results.txt');
