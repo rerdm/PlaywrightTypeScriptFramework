@@ -26,8 +26,9 @@ constructor(config: FullConfig) {
     // Log to console
     console.log(logMessage);
 
-    // Append to results file for all statuses except 'passed'
-    if (status !== 'passed') {
+    // Append to results file only for the final attempt
+    const isFinalAttempt = result.retry === test.results.length - 1;
+    if (isFinalAttempt && status !== 'passed') {
       fs.appendFileSync(this.resultsFile, `${logMessage}\n`, 'utf-8');
 
       // Save trace for failed tests
