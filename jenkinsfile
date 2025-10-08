@@ -6,8 +6,8 @@ pipeline {
                      name: 'BRANCH_NAME', 
                      type: 'PT_BRANCH', 
                      description: 'Wähle einen Branch aus'
-        choice(name: 'Environment', choices: ['prod'], defaultValue: 'prod', description: 'Testing Environment')
-        choice(name: 'Tag', choices: ['@SMOKE','@LOGIN','@REGISTRATION','@ECOMMERCE','ALLtests'], defaultValue: '@SMOKE', description: 'Select test category')
+        choice(name: 'Environment', choices: ['prod'], description: 'Testing Environment')
+        choice(name: 'Tag', choices: ['@SMOKE','@LOGIN','@REGISTRATION','@ECOMMERCE','ALLtests'], description: 'Select test category')
     }
     stages {
         stage('Checkout Branch') {
