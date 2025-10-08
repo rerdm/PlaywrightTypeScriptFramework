@@ -70,7 +70,7 @@ pipeline {
                     echo "Reading test results from results.txt..."
 
                     def results = readFile('test-results/results.txt').split('\n')
-                    def uniqueResults = results.toSet() // Deduplicate results
+                    def uniqueResults = results.toList().toSet() // Deduplicate results
                     uniqueResults.each { line ->
                         echo line
                     }
