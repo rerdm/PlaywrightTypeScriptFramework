@@ -28,25 +28,36 @@ test.describe('Login Tests', () => {
 
   test('should successfully login with valid credentials @SMOKE', async ({ page }) => {
     // Test data - you may need to adjust these credentials
-    const validUsername = 'tester1';
+    const validUsername = 'testerw';
     const validPassword = 'passwort1234';
     
-    await loginPage.login(validUsername, validPassword);
-    
-    // Verify successful login by checking if redirected and navigation shows logged-in state
-    await navigationPage.waitForNavigation();
-    expect(await navigationPage.isLoggedIn()).toBe(true);
+    await test.step('Login with valid credentials', async () => {
+      await test.step('Enter username and password', async () => {
+        await loginPage.login(validUsername, validPassword);
+      });
+
+      await test.step('Verify navigation after login', async () => {
+        await navigationPage.waitForNavigation();
+        expect(await navigationPage.isLoggedIn()).toBe(true);
+      });
+    });
   });
 
   test('should show error for invalid credentials', async ({ page }) => {
     const invalidUsername = 'tester2';
     const invalidPassword = 'invalidpassword';
-    
-    await loginPage.login(invalidUsername, invalidPassword);
-    
-    // Verify error is shown and user is not logged in
-    await expect(page.locator('text=error').or(page.locator('.text-red-400'))).toBeVisible({ timeout: 3000 });
-    expect(await navigationPage.isLoggedIn()).toBe(false);
+
+    await test.step('Attempt login with invalid credentials', async () => {
+      await loginPage.login(invalidUsername, invalidPassword);
+    });
+
+    await test.step('Verify error message is displayed', async () => {
+      await expect(page.locator('text=error').or(page.locator('.text-red-400'))).toBeVisible({ timeout: 3000 });
+    });
+
+    await test.step('Ensure user is not logged in', async () => {
+      expect(await navigationPage.isLoggedIn()).toBe(false);
+    });
   });
 
   test('should show validation error for empty fields @Login-004', async ({ page }) => {
@@ -58,11 +69,13 @@ test.describe('Login Tests', () => {
   });
 
   test('should navigate to register page @Login-001', async ({ page }) => {
-    await loginPage.goToRegister();
-    
-    // Verify navigation to register page
-    await expect(page).toHaveURL(/register\.php/);
-    await expect(page.locator('h1')).toContainText('Create Account');
+    await test.step('Navigate to register page', async () => {
+      await loginPage.goToRegister();
+      await test.step('Verify register page', async () => {
+        await expect(page).toHaveURL(/register\.php/);
+        await expect(page.locator('h1')).toContainText('Create Account');
+      });
+    });
   });
 
   test('should handle registration success popup @Login-005', async ({ page }) => {

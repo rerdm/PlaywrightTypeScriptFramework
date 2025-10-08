@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import { loadEnvironmentConfig } from './utils/environment-config';
+import FailedTestReporter from './utils/FailedTestReporter';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -32,6 +33,8 @@ export default defineConfig({
     ['allure-playwright', { outputFolder: 'allure-results' }], 
     ['line'],
     //['./utils/custom-reporter.ts'] // Use Playwright template reporter 
+    //['list'], ['./utils/FailedTestReporter']
+    ['./utils/MyReporter']
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   globalSetup: require.resolve('./utils/global-setup'),
