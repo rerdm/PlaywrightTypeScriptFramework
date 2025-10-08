@@ -43,7 +43,7 @@ test.describe('Login Tests', () => {
     });
   });
 
-  test('should show error for invalid credentials', async ({ page }) => {
+  test('should show error for invalid credentials @SMOKE', async ({ page }) => {
     const invalidUsername = 'tester2';
     const invalidPassword = 'invalidpassword';
 
