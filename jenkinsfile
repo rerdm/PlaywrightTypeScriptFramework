@@ -13,7 +13,8 @@ pipeline {
         stage('Checkout Branch') {
             steps {
                 script {
-                    def branchName = params.BRANCH_NAME.tokenize('/').last()
+                    // Sicherstellen, dass BRANCH_NAME korrekt initialisiert ist
+                    def branchName = params.BRANCH_NAME?.tokenize('/')?.last() ?: 'master'
                     echo "Checking out branch: ${branchName}"
 
                     checkout([
