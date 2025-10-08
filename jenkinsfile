@@ -70,10 +70,11 @@ pipeline {
                     echo "Reading test results from results.txt..."
 
                     def results = readFile('test-results/results.txt').split('\n')
-                    results.each { line ->
+                    def uniqueResults = results.toSet() // Deduplicate results
+                    uniqueResults.each { line ->
                         echo line
                     }
-                    def formattedResults = readFile('test-results/results.txt')
+                    def formattedResults = uniqueResults.join('\n')
                     def subject = "Jenkins Job: ${env.JOB_NAME} - Branch ${BRANCH_NAME} - Build #${env.BUILD_NUMBER}"
                     def body = """The Jenkins job has completed.
 
