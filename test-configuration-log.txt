@@ -1,7 +1,8 @@
-╔══════════════════════════════════════════════════╗
-║ Test Configuration:                              ║
-║ Retries: 0                                       ║
-║ Environment: prod                                ║
-║ Base URL: https://rerd.de/testing-website/       ║
-║                                                  ║
-╚══════════════════════════════════════════════════╝
++--------------------------------------------------+
+| Test Configuration:                              |
+| Retries: 0                                       |
+| Environment: prod                                |
+| Base URL: https://rerd.de/testing-website/       |
+| Global Timeout: 60000ms                          |
+|                                                  |
++--------------------------------------------------+

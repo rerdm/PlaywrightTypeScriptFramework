@@ -9,6 +9,9 @@ import FailedTestReporter from './utils/FailedTestReporter';
 // Load environment configuration
 const envConfig = loadEnvironmentConfig();
 
+// Get GLOBAL_TIMEOUT from environment variable or use default value
+const GLOBAL_TIMEOUT = parseInt(process.env.GLOBAL_TIMEOUT || '30000', 10);
+
 export default defineConfig({
   testDir: './tests',
   /* Run tests in files in parallel for staging, sequentially for local */
@@ -20,9 +23,8 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   /* Set workers based on environment: multiple for staging, 1 for local */
   workers: envConfig.environment === 'prod' ? undefined : 1,
-  
-  /* Verlängerte Timeouts für VPN-Verbindungen */
-  timeout: 30000, // 30 Sekunden pro Test
+
+  timeout: GLOBAL_TIMEOUT, // Use GLOBAL_TIMEOUT for test timeout
   expect: {
     timeout: 10000 // 10 Sekunden für Expectations
   },
@@ -32,8 +34,6 @@ export default defineConfig({
     ['html', { outputFolder: 'playwright-report', open: 'never' }], 
     ['allure-playwright', { outputFolder: 'allure-results' }], 
     ['line'],
-    //['./utils/custom-reporter.ts'] // Use Playwright template reporter 
-    //['list'], ['./utils/FailedTestReporter']
     ['./utils/MyReporter']
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -45,7 +45,6 @@ export default defineConfig({
     baseURL: envConfig.baseURL,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    // trace: 'on-first-retry' (optional): Captures a trace file on the first retry, which can be useful for debugging.
     trace: 'on', // Enable trace collection for all tests
     headless: envConfig.headless,
 

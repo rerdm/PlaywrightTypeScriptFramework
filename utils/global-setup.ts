@@ -11,8 +11,11 @@ async function globalSetup(config: FullConfig) {
   const retries = config.projects[0]?.retries ?? 0;
   const environment = envConfig.environment;
   const baseURL = envConfig.baseURL;
-  
-  const logMessage = `Test Configuration:\nRetries: ${retries}\nEnvironment: ${environment}\nBase URL: ${baseURL}\n`;
+
+  // Get GLOBAL_TIMEOUT from environment variable or use default value
+  const GLOBAL_TIMEOUT = parseInt(process.env.GLOBAL_TIMEOUT || '30000', 10);
+
+  const logMessage = `Test Configuration:\nRetries: ${retries}\nEnvironment: ${environment}\nBase URL: ${baseURL}\nGlobal Timeout: ${GLOBAL_TIMEOUT}ms\n`;
 
   const boxTop = '+--------------------------------------------------+';
   const boxBottom = '+--------------------------------------------------+';
