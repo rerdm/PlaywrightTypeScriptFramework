@@ -14,11 +14,11 @@ async function globalSetup(config: FullConfig) {
   
   const logMessage = `Test Configuration:\nRetries: ${retries}\nEnvironment: ${environment}\nBase URL: ${baseURL}\n`;
 
-  const boxTop = '╔' + '═'.repeat(50) + '╗';
-  const boxBottom = '╚' + '═'.repeat(50) + '╝';
+  const boxTop = '+--------------------------------------------------+';
+  const boxBottom = '+--------------------------------------------------+';
   const boxContent = logMessage
     .split('\n')
-    .map(line => `║ ${line.padEnd(48)} ║`)
+    .map(line => `| ${line.padEnd(48)} |`)
     .join('\n');
 
   const boxedLogMessage = `${boxTop}\n${boxContent}\n${boxBottom}`;

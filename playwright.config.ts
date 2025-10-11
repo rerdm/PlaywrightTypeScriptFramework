@@ -12,14 +12,14 @@ const envConfig = loadEnvironmentConfig();
 export default defineConfig({
   testDir: './tests',
   /* Run tests in files in parallel for staging, sequentially for local */
-  fullyParallel: envConfig.environment === 'staging',
+  fullyParallel: envConfig.environment === 'prod',
 
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Set workers based on environment: multiple for staging, 1 for local */
-  workers: envConfig.environment === 'staging' ? undefined : 1,
+  workers: envConfig.environment === 'prod' ? undefined : 1,
   
   /* Verlängerte Timeouts für VPN-Verbindungen */
   timeout: 30000, // 30 Sekunden pro Test
