@@ -15,7 +15,7 @@ test.describe('Registration Tests', () => {
     await registerPage.goto();
   });
 
-  test('should display registration form elements', async ({ page }) => {
+  test('TEST-0010 should display registration form elements', async ({ page }) => {
     // Verify all registration form elements are present
     await expect(registerPage.usernameInput).toBeVisible();
     await expect(registerPage.emailInput).toBeVisible();
@@ -30,7 +30,7 @@ test.describe('Registration Tests', () => {
     await expect(page.locator('h1')).toContainText('Create Account');
   });
 
-  test('should successfully register with valid data', async ({ page }) => {
+  test('TEST-0020 should successfully register with valid data', async ({ page }) => {
     const timestamp = Date.now();
     const userData = {
       username: `testuser${timestamp}`,
@@ -53,7 +53,7 @@ test.describe('Registration Tests', () => {
     await expect(page.locator('text=Registration Successful!')).toBeVisible();
   });
 
-  test('should show error for duplicate username', async ({ page }) => {
+  test('TEST-0030 should show error for duplicate username', async ({ page }) => {
     const userData = {
       username: 'existinguser', // This should be an existing username in your test data
       email: 'newemail@example.com',
@@ -71,7 +71,7 @@ test.describe('Registration Tests', () => {
     expect(errors.some(error => error.toLowerCase().includes('username'))).toBe(true);
   });
 
-  test('should show error for duplicate email', async ({ page }) => {
+  test('TEST-0040 should show error for duplicate email', async ({ page }) => {
     const userData = {
       username: 'newuser123',
       email: 'existing@example.com', // This should be an existing email in your test data
@@ -89,7 +89,7 @@ test.describe('Registration Tests', () => {
     expect(errors.some(error => error.toLowerCase().includes('email'))).toBe(true);
   });
 
-  test('should show error for password mismatch', async ({ page }) => {
+  test('TEST-0050 should show error for password mismatch', async ({ page }) => {
     const timestamp = Date.now();
     const userData = {
       username: `testuser${timestamp}`,
@@ -108,7 +108,7 @@ test.describe('Registration Tests', () => {
     expect(errors.some(error => error.toLowerCase().includes('password'))).toBe(true);
   });
 
-  test('should show validation error for empty required fields', async ({ page }) => {
+  test('TEST-0060 should show validation error for empty required fields', async ({ page }) => {
     await registerPage.registerButton.click();
     
     // HTML5 validation should prevent form submission
@@ -119,7 +119,7 @@ test.describe('Registration Tests', () => {
     await expect(registerPage.passwordRepeatInput).toHaveAttribute('required');
   });
 
-  test('should validate email format', async ({ page }) => {
+  test('TEST-0070 should validate email format', async ({ page }) => {
     const timestamp = Date.now();
     const userData = {
       username: `testuser${timestamp}`,
@@ -135,7 +135,7 @@ test.describe('Registration Tests', () => {
     await expect(registerPage.emailInput).toHaveAttribute('type', 'email');
   });
 
-  test('should validate date format', async ({ page }) => {
+  test('TEST-0080 should validate date format', async ({ page }) => {
     const timestamp = Date.now();
     const userData = {
       username: `testuser${timestamp}`,
@@ -157,7 +157,7 @@ test.describe('Registration Tests', () => {
     await expect(registerPage.birthdateInput).toHaveAttribute('type', 'date');
   });
 
-  test('should navigate to login page', async ({ page }) => {
+  test('TEST-0090 should navigate to login page', async ({ page }) => {
     await registerPage.goToLogin();
     
     // Verify navigation to login page
@@ -165,7 +165,7 @@ test.describe('Registration Tests', () => {
     await expect(page.locator('h1')).toContainText('Welcome Back');
   });
 
-  test('should register and then login with new account', async ({ page }) => {
+  test('TEST-0091 should register and then login with new account', async ({ page }) => {
     const timestamp = Date.now();
     const userData = {
       username: `testuser${timestamp}`,

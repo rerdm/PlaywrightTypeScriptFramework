@@ -8,6 +8,7 @@ pipeline {
                      description: 'Wähle einen Branch aus'
         string(name: 'paramter_for_test', defaultValue: '', description: 'Parameter to test', trim: true)
         choice(name: 'Environment', choices: ['prod'], description: 'Testing Environment')
+        booleanParam(name: 'Headles', defaultValue: false, description: 'Run test in headles mode')
         booleanParam(name: 'SEND_EMAIL', defaultValue: false, description: 'Send email notification after tests')
     }
     stages {
@@ -63,6 +64,9 @@ pipeline {
             }
         }
         stage('Send Email Notification') {
+            when {
+                expression { params.SEND_EMAIL == true }
+            }
             steps {
                 script {
                     echo "Reading test results from results.txt..."

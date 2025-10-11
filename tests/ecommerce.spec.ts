@@ -17,7 +17,7 @@ test.describe('E-Commerce Flow Tests', () => {
     navigationPage = new NavigationPage(page);
   });
 
-  test('should display shop page elements', async ({ page }) => {
+  test('TEST-0100 should display shop page elements', async ({ page }) => {
     await shopPage.goto();
     
     // Verify shop page elements are present
@@ -30,7 +30,7 @@ test.describe('E-Commerce Flow Tests', () => {
     await shopPage.waitForProductsToLoad();
   });
 
-  test('should filter products by category', async ({ page }) => {
+  test('TEST-0200 should filter products by category', async ({ page }) => {
     await shopPage.goto();
     await shopPage.waitForProductsToLoad();
     
@@ -47,7 +47,7 @@ test.describe('E-Commerce Flow Tests', () => {
     expect(filteredProductCount).toBeLessThanOrEqual(initialProductCount);
   });
 
-  test('should sort products', async ({ page }) => {
+  test('TEST-0300 should sort products', async ({ page }) => {
     await shopPage.goto();
     await shopPage.waitForProductsToLoad();
     
@@ -59,7 +59,7 @@ test.describe('E-Commerce Flow Tests', () => {
     expect(await shopPage.getProductCount()).toBeGreaterThan(0);
   });
 
-  test('should search for products', async ({ page }) => {
+  test('TEST-0400 should search for products', async ({ page }) => {
     await shopPage.goto();
     await shopPage.waitForProductsToLoad();
     
@@ -72,7 +72,7 @@ test.describe('E-Commerce Flow Tests', () => {
     expect(searchResultCount).toBeGreaterThanOrEqual(0);
   });
 
-  test('should reset filters', async ({ page }) => {
+  test('TEST-0500 should reset filters', async ({ page }) => {
     await shopPage.goto();
     await shopPage.waitForProductsToLoad();
     
@@ -89,7 +89,7 @@ test.describe('E-Commerce Flow Tests', () => {
     expect(await shopPage.getProductCount()).toBeGreaterThan(0);
   });
 
-  test('should add product to cart when logged in', async ({ page }) => {
+  test('TEST-0600 should add product to cart when logged in', async ({ page }) => {
     // First login
     await loginPage.goto();
     await loginPage.login('testuser', 'testpassword'); // Adjust credentials
@@ -109,7 +109,7 @@ test.describe('E-Commerce Flow Tests', () => {
     }
   });
 
-  test('should complete full purchase flow', async ({ page }) => {
+  test('TEST-0700 should complete full purchase flow', async ({ page }) => {
     // Login first
     await loginPage.goto();
     await loginPage.login('testuser', 'testpassword'); // Adjust credentials
@@ -139,7 +139,7 @@ test.describe('E-Commerce Flow Tests', () => {
     }
   });
 
-  test('should update cart quantities', async ({ page }) => {
+  test('TEST-0800 should update cart quantities', async ({ page }) => {
     // Login and add product to cart first
     await loginPage.goto();
     await loginPage.login('testuser', 'testpassword'); // Adjust credentials
@@ -166,7 +166,7 @@ test.describe('E-Commerce Flow Tests', () => {
     }
   });
 
-  test('should remove product from cart', async ({ page }) => {
+  test('TEST-0900 should remove product from cart', async ({ page }) => {
     // Login and add product to cart first
     await loginPage.goto();
     await loginPage.login('testuser', 'testpassword'); // Adjust credentials
@@ -196,7 +196,7 @@ test.describe('E-Commerce Flow Tests', () => {
     }
   });
 
-  test('should show empty cart message when no items', async ({ page }) => {
+  test('TEST-0910 should show empty cart message when no items', async ({ page }) => {
     // Login first
     await loginPage.goto();
     await loginPage.login('testuser', 'testpassword'); // Adjust credentials
@@ -212,7 +212,7 @@ test.describe('E-Commerce Flow Tests', () => {
     }
   });
 
-  test('should navigate from empty cart to shop', async ({ page }) => {
+  test('TEST-0920 should navigate from empty cart to shop', async ({ page }) => {
     // Login first
     await loginPage.goto();
     await loginPage.login('testuser', 'testpassword'); // Adjust credentials
