@@ -8,6 +8,7 @@ pipeline {
                      description: 'Wähle einen Branch aus'
         string(name: 'paramter_for_test', defaultValue: '', description: 'Parameter to test', trim: true)
         choice(name: 'Environment', choices: ['prod'], description: 'Testing Environment')
+        booleanParam(name: 'SEND_EMAIL', defaultValue: false, description: 'Send email notification after tests')
     }
     stages {
         stage('Checkout Branch') {
