@@ -6,8 +6,8 @@ pipeline {
                      name: 'BRANCH_NAME', 
                      type: 'PT_BRANCH', 
                      description: 'Wähle einen Branch aus'
+        string(name: 'paramter_for_test', defaultValue: '', description: 'Parameter to test', trim: true)
         choice(name: 'Environment', choices: ['prod'], description: 'Testing Environment')
-        choice(name: 'Tag', choices: ['@SMOKE','@LOGIN','@REGISTRATION','@ECOMMERCE','ALLtests'], description: 'Select test category')
     }
     stages {
         stage('Checkout Branch') {
@@ -36,10 +36,7 @@ pipeline {
         stage('Run Playwright Tests') {
             steps {
                 script {
-                    def npmCommand = "npm run test:${params.Environment}:tc"
-                    if (params.Tag != 'ALLtests') {
-                        npmCommand = npmCommand + " \"${params.Tag}\""
-                    }
+                    def npmCommand = "npx playwright test ${params.paramter_for_test}"
                     echo "Running command: ${npmCommand}"
                     try {
                         bat "${npmCommand}"
@@ -70,8 +67,7 @@ pipeline {
                     echo "Reading test results from results.txt..."
 
                     def results = readFile('test-results/results.txt').split('\n')
-                    def uniqueResults = results.toList().toSet() // Deduplicate results
-                    uniqueResults.each { line ->
+                    results.each { line ->
                         echo line
                     }
                     def formattedResults = uniqueResults.join('\n')
