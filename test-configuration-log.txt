@@ -1,0 +1,7 @@
+╔══════════════════════════════════════════════════╗
+║ Test Configuration:                              ║
+║ Retries: 0                                       ║
+║ Environment: prod                                ║
+║ Base URL: https://rerd.de/testing-website/       ║
+║                                                  ║
+╚══════════════════════════════════════════════════╝

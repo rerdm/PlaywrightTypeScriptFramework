@@ -183,8 +183,8 @@ class PlaywrightTestParser {
    * Extrahiert Tags aus dem Test-Namen (z.B. @login, @smoke, @TC-10001)
    */
   private extractTags(testName: string): string[] {
-    // Updated pattern to include hyphens/dashes in tags
-    const tagPattern = /@[\w-]+/g;
+    // Updated pattern to include TEST-0003 without requiring @
+    const tagPattern = /(?:@|\b)(TEST-\d+)/g; // Match @TEST-0003 or TEST-0003
     const matches = testName.match(tagPattern);
     return matches || [];
   }
@@ -309,7 +309,7 @@ class PlaywrightTestParser {
       if (suite.afterEach) hooks.push('afterEach');
       if (suite.beforeAll) hooks.push('beforeAll');
       if (suite.afterAll) hooks.push('afterAll');
-      const hooksStr = hooks.length > 0 ? hooks.join(', ') : '-';
+      const hooksStr = hooks.length > 0 ? hooks.join(', ') : '';
 
       for (let i = 0; i < suite.tests.length; i++) {
         const test = suite.tests[i];
