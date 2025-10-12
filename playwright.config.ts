@@ -21,13 +21,18 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Set workers based on environment: multiple for staging, 1 for local */
+
   workers: envConfig.environment === 'prod' ? undefined : 1,
 
   timeout: GLOBAL_TIMEOUT, // Use GLOBAL_TIMEOUT for test timeout
   expect: {
     timeout: 10000 // 10 Sekunden für Expectations
   },
+
+  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  globalSetup: require.resolve('./utils/global-setup'),
+  globalTeardown: require.resolve('./utils/global-teardown'),
+  
   
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
@@ -36,10 +41,7 @@ export default defineConfig({
     ['line'],
     ['./utils/MyReporter']
   ],
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-  globalSetup: require.resolve('./utils/global-setup'),
-  globalTeardown: require.resolve('./utils/global-teardown'),
-  
+
   use: {
     /* Base URL will be set per project */
     baseURL: envConfig.baseURL,

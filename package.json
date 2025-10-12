@@ -15,7 +15,6 @@
     "test:prod": "cross-env ENV=local playwright test",
     "test:prod:tc": "cross-env ENV=prod HEADLESS=true playwright test --grep",
     "test:prod:tc:headed": "cross-env ENV=prod HEADLESS=false playwright test --grep",
-    "test-table": "ts-node utils/generate-test-table.ts",
     "test:report": "npx playwright test --reporter=line,junit,json"
   },
   "keywords": [],

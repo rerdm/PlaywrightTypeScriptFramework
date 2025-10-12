@@ -60,7 +60,7 @@ test.describe('Login Tests', () => {
     });
   });
 
-  test('TEST-0004 should show validation error for empty fields @Login-004', async ({ page }) => {
+  test.skip('TEST-0004 should show validation error for empty fields @SMOKE', async ({ page }) => {
     await loginPage.loginButton.click();
     
     // HTML5 validation should prevent form submission

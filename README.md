@@ -254,10 +254,8 @@ The project supports multiple environments through `.env` files and npm scripts 
 
 #### Available Environments
 
-- **local**   - Local tests with visible browser (HEADLESS=false) 
-- **staging** - Pipeline tests without browser (HEADLESS=true)
+- **prod**   - Local tests with visible browser 
 
-**Important**: If the IP address changes (local) or the staging URL changes (different GitHub Page URL) - the envs must be adjusted.
 
 ### Creating New Environment
 
@@ -277,52 +275,23 @@ This project uses tags for grouping and filtering test cases. Each test case has
 
 Test execution is done through various npm scripts, each using a specific environment or filtering. By default, all tests are executed, but additional options allow targeted selection of individual tests, test tags, or environments. Control is done through the configuration in `playwright.config.ts` as well as the respective `.env` files. For targeted execution of individual tests or test groups, flexible commands are available that enable quick adaptation to different test requirements.
 
-### Local
+### Prod
 ```bash
-npm run test:local 
+npm run test:prod 
 # Example: Runs all tests in the local environment (HEADLESS=false)
 
-npm run test:local login.spec.ts:24
+npm run test:prod login.spec.ts:24
 # Example: Runs a specific test from login.spec.ts (line 24) in the local environment (HEADLESS=false)
 
-npm run test:local:tc "@TC-10001"
+npm run test:prod:tc "@TC-10001"
 # Example: Runs the test with number TC-10001 (TC can have multiple tags but only the single one is selected)
 
-npm run test:local:tag "@login"
+npm run test:prod:tag "@login"
 # Example: Runs the test(s) with the tag @login (TC can have multiple tags but only the single one is selected)
 
 
-npm run test:local:tag "@Smoke-Test @login"
-# Example: Runs the test(s) - IMPORTANT: The *tags must be consecutive in the test title* otherwise the tests will not be found
-
 ```
 
-### Staging (Pipeline)
-
-```bash
-
-npm run test:staging
-# Example: Runs all tests in the staging environment (HEADLESS=true)
-
-npm run test:staging login_staging.spec.ts:34
-# Example: Runs a specific test from login_staging.spec.ts (line 34) in the staging environment (HEADLESS=true)
-
-npm run test:staging:headed
-# Example: Runs all in visible browser / (HEADLESS=false) not for pipeline, only for debugging
-
-npm run test:staging:tc "@TC-10001"
-# Example: Runs the test with number TC-10001 (TC can have multiple tags but only the single one is selected)
-
-npm run test:local:tag "@login"
-# Example: Runs all tests with tag "@login" in the local environment (TC can have multiple tags but only the single one is selected)
-
-npm run test:staging:tag:headed "@Login"
-# Example: Runs all tests with tag "@Login" /(HEADLESS=false) not for pipeline, only for debugging
-
-npm run test:staging:tag "@Smoke-Test @login"
-# Example: Runs the test(s) - IMPORTANT: The *tags must be consecutive in the test title* otherwise the tests will not be found
-
-```
 
 ## Utils
 
@@ -783,7 +752,113 @@ pipeline {
 2. **Monitor the Build**:
    - View the console output to monitor the progress of the pipeline.
 
-#### Benefits of Using Jenkins
+#### Jenkins Pipeline
+
+```groovy
+pipeline {
+    agent any
+    parameters {
+        gitParameter branchFilter: '.*', 
+                     defaultValue: 'master', 
+                     name: 'BRANCH_NAME', 
+                     type: 'PT_BRANCH', 
+                     description: 'Wähle einen Branch aus'
+        string(name: 'paramter_for_test', defaultValue: '', description: 'Parameter to test', trim: true)
+        choice(name: 'Environment', choices: ['prod'], description: 'Testing Environment')
+        booleanParam(name: 'Headles', defaultValue: false, description: 'Run test in headles mode')
+        booleanParam(name: 'SEND_EMAIL', defaultValue: false, description: 'Send email notification after tests')
+    }
+    stages {
+        stage('Checkout Branch') {
+            steps {
+                script {
+                    // Sicherstellen, dass BRANCH_NAME korrekt initialisiert ist
+                    def branchName = params.BRANCH_NAME?.tokenize('/')?.last() ?: 'master'
+                    echo "Checking out branch: ${branchName}"
+
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: "*/${branchName}"]],
+                        userRemoteConfigs: [[url: 'https://github.com/rerdm/PlaywrightTypeScriptFramework.git']]
+                    ])
+                }
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    bat 'npm install'
+                    bat 'npx playwright install'
+                }
+            }
+        }
+        stage('Run Playwright Tests') {
+            steps {
+                script {
+                    def npmCommand = "npx playwright test ${params.paramter_for_test}"
+                    echo "Running command: ${npmCommand}"
+                    try {
+                        bat "${npmCommand}"
+                    } catch (err) {
+                        echo "[ERROR] Playwright Tests failed: ${err}"
+                        currentBuild.result = 'FAILURE'
+                    }
+                }
+            }
+        }
+        stage('Create and Upload ZIP Artifact') {
+            steps {
+                script {
+                    def timestamp = new Date().format("yyyy-MM-dd_HH-mm")
+                    def zipFileName = "playwright-report_${timestamp}.zip"
+
+                    echo "Creating ZIP file: ${zipFileName}"
+                    bat "powershell Compress-Archive -Path playwright-report/* -DestinationPath ${zipFileName}"
+
+                    echo "Archiving ZIP file: ${zipFileName}"
+                    archiveArtifacts artifacts: zipFileName, allowEmptyArchive: false
+                }
+            }
+        }
+        stage('Send Email Notification') {
+            when {
+                expression { params.SEND_EMAIL == true }
+            }
+            steps {
+                script {
+                    echo "Reading test results from results.txt..."
+
+                    def results = readFile('test-results/results.txt').split('\n')
+                    results.each { line =>
+                        echo line
+                    }
+                    def formattedResults = results.join('\n')
+                    def subject = "Jenkins Job: ${env.JOB_NAME} - Branch ${BRANCH_NAME} - Build #${env.BUILD_NUMBER}"
+                    def body = """The Jenkins job has completed.
+
+Status: ${currentBuild.currentResult}
+
+Check the Jenkins job details here: ${env.BUILD_URL}
+
+Results:
+${formattedResults}
+
+"""
+
+                    emailext (
+                        to: 'rene.erdmann1987@gmail.com,reneerdmann87@web.de',
+                        from: 'rene.erdmann1987@gmail.com',
+                        subject: subject,
+                        body: body
+                    )
+                }
+            }
+        }
+    }
+}
+```
+
+### Benefits of Using Jenkins
 
 - **Customizable Parameters**: Easily configure test environments, tags, and modes.
 - **SCM Integration**: Automatically fetch and execute the `Jenkinsfile` from your repository.

@@ -1,7 +1,9 @@
 import { FullConfig } from '@playwright/test';
-import { StepLogger } from './StepLogger';
+import fs from 'fs';
+import path from 'path';
 
 async function globalTeardown(config: FullConfig) {
+ 
 }
 
 export default globalTeardown;

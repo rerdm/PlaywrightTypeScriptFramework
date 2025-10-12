@@ -69,13 +69,7 @@ pipeline {
             }
             steps {
                 script {
-                    echo "Reading test results from results.txt..."
 
-                    def results = readFile('test-results/results.txt').split('\n')
-                    results.each { line ->
-                        echo line
-                    }
-                    def formattedResults = results.join('\n')
                     def subject = "Jenkins Job: ${env.JOB_NAME} - Branch ${BRANCH_NAME} - Build #${env.BUILD_NUMBER}"
                     def body = """The Jenkins job has completed.
 
@@ -83,14 +77,13 @@ Status: ${currentBuild.currentResult}
 
 Check the Jenkins job details here: ${env.BUILD_URL}
 
-Results:
-${formattedResults}
+}
 
 """
 
                     emailext (
                         to: 'rene.erdmann1987@gmail.com,reneerdmann87@web.de',
-                        from: 'rene.erdmann1987@gmail.com',
+                        from: 'Jenkins@no-reply.com',
                         subject: subject,
                         body: body
                     )
