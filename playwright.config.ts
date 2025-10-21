@@ -38,6 +38,7 @@ export default defineConfig({
   reporter: [
     ['html', { outputFolder: 'playwright-report', open: 'never' }], 
     ['allure-playwright', { outputFolder: 'allure-results' }], 
+    ['junit', { outputFile: 'test-results/junit-report.xml' }],  // Added JUnit XML reporter for Jenkins
     ['line'],
     ['./utils/MyReporter']
   ],

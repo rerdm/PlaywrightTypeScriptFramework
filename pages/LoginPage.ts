@@ -1,6 +1,5 @@
 import { Page, Locator, expect } from "@playwright/test";
 import { loadEnvironmentConfig } from "../utils/environment-config";
-import { StepLogger } from "../utils/StepLogger";
 
 export class LoginPage {
   readonly page: Page;
@@ -33,7 +32,9 @@ export class LoginPage {
   }
 
   /**
-   * Erwartet, dass ein Fehler für ungültige Logindaten angezeigt wird
+   * @description
+   * @return {*}  {Promise<void>}
+   * @memberof LoginPage
    */
   async expectLoginErrorVisible(): Promise<void> {
     await expect(
@@ -41,9 +42,7 @@ export class LoginPage {
     ).toBeVisible({ timeout: 3000 });
   }
 
-  /**
-   * Erwartet, dass die Felder als required markiert sind
-   */
+
   async expectRequiredFields(): Promise<void> {
     await expect(this.usernameInput).toHaveAttribute("required");
     await expect(this.passwordInput).toHaveAttribute("required");

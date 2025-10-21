@@ -12,6 +12,17 @@ pipeline {
         booleanParam(name: 'SEND_EMAIL', defaultValue: false, description: 'Send email notification after tests')
     }
     stages {
+        stage('Cleanup') {
+            steps {
+                script {
+                    // Clean previous test results
+                    bat 'if exist "test-results" rmdir /s /q "test-results"'
+                    bat 'if exist "allure-results" rmdir /s /q "allure-results"'
+                    bat 'if exist "playwright-report" rmdir /s /q "playwright-report"'
+                    bat 'mkdir test-results'
+                }
+            }
+        }
         stage('Checkout Branch') {
             steps {
                 script {
@@ -44,8 +55,35 @@ pipeline {
                         bat "${npmCommand}"
                     } catch (err) {
                         echo "[ERROR] Playwright Tests failed: ${err}"
-                        currentBuild.result = 'FAILURE'
+                        currentBuild.result = 'UNSTABLE'  // Changed from FAILURE to UNSTABLE to continue with reports
                     }
+                }
+            }
+            post {
+                always {
+                    // Publish JUnit XML test results
+                    publishTestResults([
+                        testResultsPattern: 'test-results/junit-report.xml'
+                    ])
+                    
+                    // Publish Allure Reports (if Allure plugin is installed)
+                    allure([
+                        includeProperties: false,
+                        jdk: '',
+                        properties: [],
+                        reportBuildPolicy: 'ALWAYS',
+                        results: [[path: 'allure-results']]
+                    ])
+                    
+                    // Archive HTML report
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright HTML Report'
+                    ])
                 }
             }
         }

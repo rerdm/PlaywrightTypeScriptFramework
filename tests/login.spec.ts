@@ -28,7 +28,7 @@ test.describe('Login Tests', () => {
 
   test('TEST-0002 should successfully login with valid credentials @SMOKE', async ({ page }) => {
     // Test data - you may need to adjust these credentials
-    const validUsername = 'testerw';
+    const validUsername = 'tester';
     const validPassword = 'passwort1234';
     
     await test.step('Login with valid credentials', async () => {
