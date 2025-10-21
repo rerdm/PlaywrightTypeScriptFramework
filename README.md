@@ -33,14 +33,10 @@ Main features covered:
     - [Available Environments](#available-environments)
     - [Environment Files](#environment-files)
     - [Creating New Environment](#creating-new-environment)
-  - [Testing](#testing)
+  - [Testing (Local)](#testing--Local-)
     - [Test-Tags and Grouping](#test-tags-and-grouping)
     - [Test Execution](#test-execution)
-      - [Local](#local)
-      - [Staging (Pipeline)](#staging-pipeline)
-  - [Utils](#utils)
-    - [Generate Test Documentation](#generate-test-documentation)
-    - [User-Registry System](#user-registry-system)
+      - [Prod](#prod)
 - [Useful Tools](#useful-tools)
   - [Playwright Codegen (UI-Tool speed up locator analyse)](#playwright-codegen-ui-tool-speed-up-locator-analyse)
 - [Code Quality & Linting](#code-quality--linting)
@@ -58,9 +54,27 @@ Main features covered:
   - [Jenkins](#jenkins)
     - [Introduction to Jenkins](#introduction-to-jenkins)
     - [How to Create a Pipeline Job in Jenkins](#how-to-create-a-pipeline-job-in-jenkins)
-    - [Adding Parameters to the Pipeline](#adding-parameters-to-the-pipeline)
-    - [Using Parameters in the Jenkinsfile](#using-parameters-in-the-jenkinsfile)
-    - [Running the Pipeline](#running-the-pipeline)
+      - [1. Install and Setup Jenkins](#1-install-and-setup-jenkins)
+      - [2. Create a New Pipeline Job from SCM](#2-create-a-new-pipeline-job-from-scm)
+    - [Jenkins Pipeline Parameters](#jenkins-pipeline-parameters)
+      - [Parameter Configuration](#parameter-configuration)
+      - [Parameter Usage Examples](#parameter-usage-examples)
+      - [Running Tests with Parameters](#running-tests-with-parameters)
+    - [Jenkins Pipeline Stages](#jenkins-pipeline-stages)
+    - [Test Reports Integration](#test-reports-integration)
+      - [1. JUnit XML Reports](#1-junit-xml-reports)
+      - [2. Playwright HTML Reports](#2-playwright-html-reports)
+      - [3. Content Security Policy (CSP) Configuration](#3-content-security-policy-csp-configuration)
+      - [4. ZIP Artifacts](#4-zip-artifacts)
+    - [What You'll See After Build Completion](#what-youll-see-after-build-completion)
+      - [Jenkins Build Dashboard](#jenkins-build-dashboard)
+      - [Test Results View](#test-results-view)
+      - [Playwright HTML Report View](#playwright-html-report-view)
+    - [Email Notifications](#email-notifications)
+      - [Gmail App Password Configuration](#gmail-app-password-configuration)
+    - [Build Status Understanding](#build-status-understanding)
+    - [Troubleshooting](#troubleshooting)
+    - [Best Practices](#best-practices)
 - [Test Reports](#test-reports)
   - [Playwright HTML Report](#playwright-html-report)
   - [ESLint HTML Report](#eslint-html-report)
@@ -254,7 +268,7 @@ The project supports multiple environments through `.env` files and npm scripts 
 
 #### Available Environments
 
-- **prod**   - Local tests with visible browser 
+- **prod**   - test on prod server 
 
 
 ### Creating New Environment
@@ -263,7 +277,7 @@ The project supports multiple environments through `.env` files and npm scripts 
 2. Fill the env file with the variables `BASE_URL` and `HEADLESS` (Only these envs are implemented so far 2025-07-23 rerd)
 3. Update `utils/environment-config.ts`: In the `getDefaultBaseURL()` function, add a new `case` for your environment, specifying both the return URL and the fallback URL as needed.
 
-## Testing
+## Testing (Local)
 
 ### Test-Tags and Grouping
 
@@ -292,96 +306,6 @@ npm run test:prod:tag "@login"
 
 ```
 
-
-## Utils
-
-### Generate Test Documentation
-
-The project contains an automatic tool for generating an overview table of all test cases:
-
-#### generate-test-table.ts
-
-- **Purpose:** Creates a clear Markdown table with all available test cases from the entire project.
-
-**What is generated:**
-- **Test Case Overview:** Complete list of all tests with names, file locations, and line numbers
-- **Tag Overview:** All used test tags (e.g. `@login`, `@Smoke-Test`...)
-- **Timestamp:** Automatic versioning of generated reports
-
-#### Execution
-
-```bash
-npm run test-table
-```
-
-#### Generated Files
-
-- **Storage Location:** `utils/test-documentation/YYYY-MM-DD_HH_MM_test-table.md`
-
-#### Playwright Test Cases Overview
-
-The overview of the Testcases (last run of `npm run test-tabke`) can be found in the folder 📁 [`utils/test-documentation`](./utils/test-documentation)
-
-
-#### Benefits of Test Documentation
-
-1. **Complete Overview:** All test cases at a glance
-2. **Tag Management:** Overview of all used test tags for better categorization
-3. **Documentation:** Automatically generated documentation for code reviews and onboarding
-4. **Versioning:** Timestamped reports for history tracking
-
-The tool automatically parses all `.spec.ts` files in the `tests/` directory and creates a structured overview of available test cases.
-
-### User-Registry System
-
-The project contains an automatic system for managing and logging registered users during test execution:
-
-#### user-registry.ts
-
-**Purpose:** Automatic storage of all successfully registered test users in a CSV file for local tracking.
-
-**Functions:**
-- **Automatic logging** of all registered users from registration tests
-- **CSV format** with creation date, username, password, and environment
-- **Environment detection** based on BASE_URL (local, staging, demo, production)
-- **Historical recording** - new users are appended to existing file
-- **Statistics** about registered users by environment
-
-#### Integration in Tests
-
-The system is automatically called in the test `Registration successfully @TC-20000`:
-
-```typescript
-import { userRegistry } from '../utils/user-registry';
-
-// Automatic call after successful registration
-userRegistry.addUser(username, password, baseUrl);
-```
-
-#### Local Usage
-
-**⚠️ Important:** This system is only intended for **local development**!
-
-```bash
-# Install required dependencies for Excel support
-npm install xlsx
-
-# Run tests (User registry is automatically populated)
-npm run test:local registration.spec.ts
-
-```
-
-#### Generated Files
-
-**Storage Location:** `utils/registered-users/`
-- `registered-users.csv` - CSV file with all registered users (new users will be attached)
-
-**CSV Format:**
-```csv
-Creation Date,Username,Password,Environment
-2025-01-18,testuser123,SecurePass123!,local
-2025-01-18,anotheruser,MyPassword456@,staging
-```
 
 #### Privacy & Git Handling
 
@@ -675,195 +599,375 @@ Jenkins is an open-source automation server used to build, test, and deploy soft
 
 #### How to Create a Pipeline Job in Jenkins
 
-1. **Install Jenkins (local on windows)**:
+##### 1. Install and Setup Jenkins
+
+1. **Install Jenkins (local on Windows)**:
    - Download Jenkins from [https://www.jenkins.io/](https://www.jenkins.io/).
    - Install it on your local machine or server.
 
 2. **Access Jenkins**:
    - Open Jenkins in your browser (default: `http://localhost:8080`).
 
-3. **Create a New Pipeline Job**:
+3. **Install Required Plugins**:
+   Navigate to **Manage Jenkins → Plugins → Available Plugins** and install:
+   - `Git Parameter Plugin` (for branch selection)
+   - `HTML Publisher Plugin` (for HTML reports)
+   - `Pipeline Plugin` (usually pre-installed)
+
+##### 2. Create a New Pipeline Job from SCM
+
+1. **Create New Pipeline Job**:
    - Click on **"New Item"** in the Jenkins dashboard.
-   - Enter a name for your job (e.g., `PlaywrightTests`).
+   - Enter a name for your job (e.g., `PlaywrightTypeScript_SCM_host_pipelinefile`).
    - Select **"Pipeline"** as the project type and click **"OK"**.
 
-4. **Configure the Pipeline**:
+2. **Configure Pipeline from SCM**:
    - Under the **"Pipeline"** section, select **"Pipeline script from SCM"**.
    - Choose **"Git"** as the SCM.
-   - Enter the repository URL (e.g., `https://github.com/rerdm/PlaywrightTypeScriptFramework.git`).
-   - Specify the branch to build (e.g., `main` or `master`).
-   - Set the **Script Path** to the location of your `Jenkinsfile` (e.g., `jenkinsfile`).
+   - Enter the repository URL: `https://github.com/rerdm/PlaywrightTypeScriptFramework.git`
+   - Set **Credentials** if needed (for private repositories).
+   - Specify the branch to build: `*/main` or `*/master`.
+   - Set the **Script Path** to: `jenkinsfile` (location of your Jenkinsfile in the repository).
 
-5. **Save and Apply**:
+3. **Save Configuration**:
    - Click **"Save"** to store the configuration.
 
-#### Adding Parameters to the Pipeline
+#### Jenkins Pipeline Parameters
 
-1. **Enable Parameters**:
-   - In the job configuration, check **"This project is parameterized"**.
+The Jenkins pipeline supports several parameters that allow flexible test execution:
 
-2. **Add Parameters**:
-   - Click **"Add Parameter"** and choose the type of parameter:
-     - **Choice Parameter**: For dropdown options (e.g., `Environment` with values `staging` and `local`).
-     - **String Parameter**: For text input (e.g., `Tag` with default value `@SMOKE`).
-     - **Boolean Parameter**: For true/false options (e.g., `Headed`).
+##### Parameter Configuration
 
-3. **Set Default Values**:
-   - Provide default values and descriptions for each parameter.
-
-#### Using Parameters in the Jenkinsfile
-
-Parameters defined in Jenkins are automatically available in the `Jenkinsfile`. You can access them using the `params` object. For example:
+Parameters are defined directly in the `jenkinsfile` and automatically appear in the Jenkins UI:
 
 ```groovy
-pipeline {
-    agent any
+parameters {
+    gitParameter branchFilter: '.*', 
+                 defaultValue: 'master', 
+                 name: 'BRANCH_NAME', 
+                 type: 'PT_BRANCH', 
+                 description: 'Select a branch to build'
+    
+    string(name: 'paramter_for_test', 
+           defaultValue: '', 
+           description: 'Playwright test parameter (e.g., login.spec.ts or @TC-10001)', 
+           trim: true)
+    
+    choice(name: 'Environment', 
+           choices: ['prod'], 
+           description: 'Testing Environment')
+    
+    booleanParam(name: 'Headles', 
+                 defaultValue: false, 
+                 description: 'Run tests in headless mode')
+    
+    booleanParam(name: 'SEND_EMAIL', 
+                 defaultValue: false, 
+                 description: 'Send email notification after tests')
+}
+```
 
-    parameters {
-        choice(name: 'Environment', choices: ['staging', 'local'], description: 'Select the environment')
-        string(name: 'Tag', defaultValue: '@SMOKE', description: 'Playwright tag, e.g., @SMOKE')
-        booleanParam(name: 'Headed', defaultValue: false, description: 'Run tests in headed mode?')
+##### Parameter Usage Examples
+
+| Parameter | Example Values | Description |
+|-----------|---------------|-------------|
+| `BRANCH_NAME` | `main`, `feature/login-tests` | Git branch to checkout and test |
+| `paramter_for_test` | `login.spec.ts`, `@TC-10001`, `@smoke` | Specific test file, test case ID, or tag |
+| `Environment` | `prod` | Environment configuration (currently only prod supported) |
+| `Headles` | `true`/`false` | Run browsers in headless mode (faster) or headed mode (visible) |
+| `SEND_EMAIL` | `true`/`false` | Send email notifications with test results |
+
+##### Running Tests with Parameters
+
+**Example 1: Run specific test file**
+- `paramter_for_test`: `login.spec.ts`
+- Result: `npx playwright test login.spec.ts`
+
+**Example 2: Run specific test case**
+- `paramter_for_test`: `@TC-10001`
+- Result: `npx playwright test @TC-10001`
+
+**Example 3: Run test suite with tag**
+- `paramter_for_test`: `@smoke`
+- Result: `npx playwright test @smoke`
+
+#### Jenkins Pipeline Stages
+
+The Jenkins pipeline consists of several stages that execute sequentially:
+
+```groovy
+stages {
+    stage('Cleanup') {
+        // Clean previous test results
     }
+    stage('Checkout Branch') {
+        // Checkout selected branch from GitHub repository
+    }
+    stage('Install Dependencies') {
+        // Install npm packages and Playwright browsers
+    }
+    stage('Run Playwright Tests') {
+        // Execute Playwright tests with specified parameters
+    }
+    stage('Publish Test Reports') {
+        // Generate and publish HTML reports
+    }
+    stage('Create and Upload ZIP Artifact') {
+        // Create ZIP file with test reports for download
+    }
+    stage('Send Email Notification') {
+        // Send email with test results (if enabled)
+    }
+}
+```
 
-    stages {
-        stage('Run Playwright Tests') {
-            steps {
-                script {
-                    def npmCommand = "npm run test:${params.Environment}:tc"
-                    if (params.Headed) {
-                        npmCommand += ":headed"
-                    }
-                    npmCommand += " \"${params.Tag}\""
-                    echo "Running command: ${npmCommand}"
-                    bat "${npmCommand}" // Use 'bat' for Windows
-                }
+#### Test Reports Integration
+
+##### 1. JUnit XML Reports
+
+JUnit XML reports are automatically generated and displayed in Jenkins:
+
+```groovy
+post {
+    always {
+        script {
+            if (fileExists('test-results/junit-report.xml')) {
+                junit 'test-results/junit-report.xml'
+                echo "JUnit XML report published successfully"
             }
         }
     }
 }
 ```
 
-#### Running the Pipeline
+**Result:** Appears as **"Test Results"** tab in Jenkins build view showing:
+- ✅ Passed tests count
+- ❌ Failed tests count  
+- ⚠️ Skipped tests count
+- Detailed test results table with execution times
 
-1. **Trigger the Job**:
-   - Click **"Build with Parameters"** in the Jenkins job dashboard.
-   - Set the desired parameter values and click **"Build"**.
+##### 2. Playwright HTML Reports
 
-2. **Monitor the Build**:
-   - View the console output to monitor the progress of the pipeline.
-
-#### Jenkins Pipeline
+Playwright HTML reports are published using the HTML Publisher Plugin:
 
 ```groovy
-pipeline {
-    agent any
-    parameters {
-        gitParameter branchFilter: '.*', 
-                     defaultValue: 'master', 
-                     name: 'BRANCH_NAME', 
-                     type: 'PT_BRANCH', 
-                     description: 'Wähle einen Branch aus'
-        string(name: 'paramter_for_test', defaultValue: '', description: 'Parameter to test', trim: true)
-        choice(name: 'Environment', choices: ['prod'], description: 'Testing Environment')
-        booleanParam(name: 'Headles', defaultValue: false, description: 'Run test in headles mode')
-        booleanParam(name: 'SEND_EMAIL', defaultValue: false, description: 'Send email notification after tests')
+script {
+    if (fileExists('playwright-report')) {
+        publishHTML([
+            allowMissing: false,
+            alwaysLinkToLastBuild: true,
+            keepAll: true,
+            reportDir: 'playwright-report',
+            reportFiles: 'index.html',
+            reportName: 'Playwright HTML Report',
+            reportTitles: 'Playwright Test Results'
+        ])
+        echo "Playwright HTML Report published successfully"
     }
-    stages {
-        stage('Checkout Branch') {
-            steps {
-                script {
-                    // Sicherstellen, dass BRANCH_NAME korrekt initialisiert ist
-                    def branchName = params.BRANCH_NAME?.tokenize('/')?.last() ?: 'master'
-                    echo "Checking out branch: ${branchName}"
+}
+```
 
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: "*/${branchName}"]],
-                        userRemoteConfigs: [[url: 'https://github.com/rerdm/PlaywrightTypeScriptFramework.git']]
-                    ])
-                }
-            }
-        }
-        stage('Install Dependencies') {
-            steps {
-                script {
-                    bat 'npm install'
-                    bat 'npx playwright install'
-                }
-            }
-        }
-        stage('Run Playwright Tests') {
-            steps {
-                script {
-                    def npmCommand = "npx playwright test ${params.paramter_for_test}"
-                    echo "Running command: ${npmCommand}"
-                    try {
-                        bat "${npmCommand}"
-                    } catch (err) {
-                        echo "[ERROR] Playwright Tests failed: ${err}"
-                        currentBuild.result = 'FAILURE'
-                    }
-                }
-            }
-        }
-        stage('Create and Upload ZIP Artifact') {
-            steps {
-                script {
-                    def timestamp = new Date().format("yyyy-MM-dd_HH-mm")
-                    def zipFileName = "playwright-report_${timestamp}.zip"
+**Result:** Appears as **"Playwright HTML Report"** tab in Jenkins build view.
 
-                    echo "Creating ZIP file: ${zipFileName}"
-                    bat "powershell Compress-Archive -Path playwright-report/* -DestinationPath ${zipFileName}"
+##### 3. Content Security Policy (CSP) Configuration
 
-                    echo "Archiving ZIP file: ${zipFileName}"
-                    archiveArtifacts artifacts: zipFileName, allowEmptyArchive: false
-                }
-            }
-        }
-        stage('Send Email Notification') {
-            when {
-                expression { params.SEND_EMAIL == true }
-            }
-            steps {
-                script {
-                    echo "Reading test results from results.txt..."
+**Important:** To display Playwright HTML reports correctly in Jenkins, you need to configure the Content Security Policy.
 
-                    def results = readFile('test-results/results.txt').split('\n')
-                    results.each { line =>
-                        echo line
-                    }
-                    def formattedResults = results.join('\n')
-                    def subject = "Jenkins Job: ${env.JOB_NAME} - Branch ${BRANCH_NAME} - Build #${env.BUILD_NUMBER}"
-                    def body = """The Jenkins job has completed.
+**Problem:** By default, Jenkins blocks external content in HTML reports, causing blank pages.
 
-Status: ${currentBuild.currentResult}
+**Solution:** Add this system property to Jenkins:
 
-Check the Jenkins job details here: ${env.BUILD_URL}
+```groovy
+System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "")
+```
 
-Results:
-${formattedResults}
+**How to apply:**
 
-"""
+1. **Method 1: Jenkins Script Console**
+   - Go to **Manage Jenkins → Script Console**
+   - Enter the command above and click **"Run"**
+   - This applies temporarily until Jenkins restart
 
-                    emailext (
-                        to: 'rene.erdmann1987@gmail.com,reneerdmann87@web.de',
-                        from: 'rene.erdmann1987@gmail.com',
-                        subject: subject,
-                        body: body
-                    )
-                }
-            }
+2. **Method 2: Permanent Configuration**
+   - Add to Jenkins startup parameters: `-Dhudson.model.DirectoryBrowserSupport.CSP=""`
+   - Or set as environment variable: `JAVA_OPTS="-Dhudson.model.DirectoryBrowserSupport.CSP=''"`
+
+**Security Note:** This disables CSP for all HTML reports. Consider using more restrictive CSP policies in production environments.
+
+##### 4. ZIP Artifacts
+
+Test reports are also packaged as downloadable ZIP files:
+
+```groovy
+stage('Create and Upload ZIP Artifact') {
+    steps {
+        script {
+            def timestamp = new Date().format("yyyy-MM-dd_HH-mm")
+            def zipFileName = "playwright-report_${timestamp}.zip"
+            
+            bat "powershell Compress-Archive -Path playwright-report/* -DestinationPath ${zipFileName}"
+            archiveArtifacts artifacts: zipFileName, allowEmptyArchive: false
         }
     }
 }
 ```
 
-### Benefits of Using Jenkins
+**Result:** Downloadable ZIP file in Jenkins build artifacts section.
 
-- **Customizable Parameters**: Easily configure test environments, tags, and modes.
-- **SCM Integration**: Automatically fetch and execute the `Jenkinsfile` from your repository.
-- **Automation**: Schedule builds or trigger them based on SCM changes.
-- **Extensibility**: Use plugins to enhance Jenkins functionality.
+#### What You'll See After Build Completion
+
+After a successful Jenkins build, you'll have access to:
+
+##### Jenkins Build Dashboard
+```
+Build #123 ← Your Build
+├── Console Output          ← Detailed build logs
+├── Test Results           ← 📊 JUnit XML table with test statistics
+├── Playwright HTML Report ← 🎭 Interactive Playwright report
+├── Changes                ← Git commit information  
+└── Build Artifacts        ← 📦 Downloadable ZIP files
+    └── playwright-report_2024-01-20_14-30.zip
+```
+
+##### Test Results View
+- **Test Summary:** Pass/Fail/Skip counts with trend graphs
+- **Test Details:** Individual test results with execution times
+- **Failure Analysis:** Stack traces and error details for failed tests
+- **Historical Trends:** Test results over multiple builds
+
+##### Playwright HTML Report View
+- **Interactive Dashboard:** Test suites overview with pass/fail status
+- **Test Details:** Individual test steps with screenshots
+- **Trace Viewer:** Step-by-step test execution replay
+- **Screenshots:** Captured images of failures
+- **Videos:** Recorded test executions (if configured)
+
+#### Email Notifications
+
+When `SEND_EMAIL` parameter is enabled, the pipeline sends detailed email notifications:
+
+```groovy
+emailext (
+    to: 'your-email@example.com',
+    subject: "Jenkins Job: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+    body: """
+    Build Status: ${currentBuild.currentResult}
+    Branch: ${params.BRANCH_NAME}
+    
+    Jenkins Build: ${env.BUILD_URL}
+    
+    Test Results:
+    ${formattedResults}
+    """
+)
+```
+
+**Email Content Includes:**
+- Build status (SUCCESS/FAILURE/UNSTABLE)
+- Branch information
+- Direct links to Jenkins build
+- Test execution summary
+- Download links for reports
+
+##### Gmail App Password Configuration
+
+To use Gmail as SMTP server in Jenkins, an **App Password** is required instead of your regular Gmail password:
+
+**1. Create Gmail App Password:**
+1. Go to your [Google Account](https://myaccount.google.com/)
+2. Select **Security** → **2-Step Verification**
+3. Scroll down to **App passwords**
+4. Select **Select app** → **Other (Custom name)**
+5. Enter "Jenkins" and click **Generate**
+6. Copy the 16-digit app password (e.g., `abcd efgh ijkl mnop`)
+
+**2. Jenkins SMTP Configuration:**
+1. Go to **Manage Jenkins** → **Configure System**
+2. Scroll to **E-mail Notification**
+3. Configure the following settings:
+   - **SMTP Server:** `smtp.gmail.com`
+   - Enable **Advanced Settings**:
+     - **Use SMTP Authentication:** ✓ enabled
+     - **Username:** Your complete Gmail address
+     - **Password:** The generated 16-digit app password
+     - **Use SSL:** ✓ enabled
+     - **SMTP Port:** `465`
+
+**3. Jenkins Job Email Configuration:**
+```groovy
+// In Jenkins Pipeline (jenkinsfile)
+emailext (
+    to: 'recipient@gmail.com',
+    from: 'your-jenkins-gmail@gmail.com',
+    subject: "Jenkins Job: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+    body: """
+    Build Status: ${currentBuild.currentResult}
+    Branch: ${params.BRANCH_NAME}
+    
+    Jenkins Build: ${env.BUILD_URL}
+    
+    Test Results:
+    ${formattedResults}
+    """
+)
+```
+
+**Important Notes:**
+- The app password is specific to Jenkins and differs from your regular Gmail password
+- Store the app password securely as it won't be displayed again
+- If issues occur, the app password can be deleted and recreated at any time
+
+#### Build Status Understanding
+
+Jenkins builds can have different statuses:
+
+| Status | Color | Meaning | What to do |
+|--------|-------|---------|------------|
+| **SUCCESS** | 🔵 Blue | All tests passed, no issues | Continue development |
+| **UNSTABLE** | 🟡 Yellow | Build successful but some tests failed | Check failed tests, fix issues |
+| **FAILURE** | 🔴 Red | Build failed completely | Check console output, fix build errors |
+
+**UNSTABLE Status:** This is the most common status when tests fail. It means:
+- ✅ Jenkins pipeline executed successfully
+- ⚠️ Some Playwright tests failed
+- ✅ All reports are still generated and available
+- ✅ You can analyze what went wrong
+
+#### Troubleshooting
+
+##### Common Issues and Solutions
+
+1. **HTML Report Shows Blank Page**
+   - **Cause:** Content Security Policy blocking content
+   - **Solution:** Apply CSP configuration: `System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "")`
+
+2. **Test Results Not Appearing**
+   - **Cause:** JUnit XML file not generated
+   - **Solution:** Check Playwright configuration includes JUnit reporter
+   - **Verify:** File exists at `test-results/junit-report.xml`
+
+3. **Pipeline Fails at Checkout**
+   - **Cause:** Invalid branch name or repository access
+   - **Solution:** Verify branch exists and Jenkins has repository access
+
+4. **Tests Fail but Build Shows SUCCESS**
+   - **Cause:** Error handling in pipeline
+   - **Solution:** Check for `currentBuild.result = 'UNSTABLE'` in jenkinsfile
+
+5. **Email Notifications Not Sent**
+   - **Cause:** SMTP not configured in Jenkins
+   - **Solution:** Configure email settings in **Manage Jenkins → Configure System → E-mail Notification**
+
+#### Best Practices
+
+1. **Parameter Validation:** Always validate parameter inputs in pipeline
+2. **Error Handling:** Use try-catch blocks for robust error handling
+3. **Artifact Management:** Keep build artifacts for reasonable retention periods
+4. **Security:** Use Jenkins credentials for sensitive information
+5. **Monitoring:** Set up build notifications for critical pipelines
+6. **Resource Management:** Clean up workspace after builds to save disk space
+
+This Jenkins integration provides a complete CI/CD solution for Playwright test automation with comprehensive reporting and notification capabilities.
 
 ## Test Reports
 

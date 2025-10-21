@@ -57,9 +57,13 @@ pipeline {
                     
                     if (testResult != 0) {
                         echo "[WARNING] Some Playwright tests failed (exit code: ${testResult})"
-                        currentBuild.result = 'UNSTABLE'
+                        currentBuild.result = 'UNSTABLE'  // Keeps build yellow, reports still generated
+                        // Alternative options:
+                        // currentBuild.result = 'FAILURE'  // Makes build red, may skip stages
+                        // currentBuild.result = 'SUCCESS'  // Ignores test failures (not recommended)
                     } else {
                         echo "[SUCCESS] All Playwright tests passed"
+                        currentBuild.result = 'SUCCESS'
                     }
                 }
             }
