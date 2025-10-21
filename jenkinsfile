@@ -83,16 +83,16 @@ pipeline {
                             ])
                         }
                         
-                        // Publish Allure Reports (only if results exist)
-                        if (fileExists('allure-results')) {
-                            allure([
-                                includeProperties: false,
-                                jdk: '',
-                                properties: [],
-                                reportBuildPolicy: 'ALWAYS',
-                                results: [[path: 'allure-results']]
-                            ])
-                        }
+                        // TODO: Configure Allure CLI in Jenkins to enable this
+                        // if (fileExists('allure-results')) {
+                        //     allure([
+                        //         includeProperties: false,
+                        //         jdk: '',
+                        //         properties: [],
+                        //         reportBuildPolicy: 'ALWAYS',
+                        //         results: [[path: 'allure-results']]
+                        //     ])
+                        // }
                     }
                 }
             }
