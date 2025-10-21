@@ -66,33 +66,40 @@ pipeline {
             post {
                 always {
                     script {
+                        // Debug: List generated files
+                        echo "=== Generated Test Files ==="
+                        if (fileExists('test-results')) {
+                            bat 'dir /b test-results'
+                        }
+                        if (fileExists('playwright-report')) {
+                            bat 'dir /b playwright-report'
+                        }
+                        
                         // Publish JUnit XML test results (only if file exists)
                         if (fileExists('test-results/junit-report.xml')) {
+                            echo "Publishing JUnit XML results..."
                             junit 'test-results/junit-report.xml'
+                        } else {
+                            echo "No JUnit XML file found at test-results/junit-report.xml"
                         }
                         
                         // Archive HTML report (only if directory exists)
                         if (fileExists('playwright-report')) {
+                            echo "Publishing Playwright HTML Report..."
                             publishHTML([
                                 allowMissing: false,
                                 alwaysLinkToLastBuild: true,
                                 keepAll: true,
                                 reportDir: 'playwright-report',
                                 reportFiles: 'index.html',
-                                reportName: 'Playwright HTML Report'
+                                reportName: 'Playwright HTML Report',
+                                reportTitles: '',
+                                includes: '**/*',
+                                excludes: ''
                             ])
+                        } else {
+                            echo "No playwright-report directory found"
                         }
-                        
-                        // TODO: Configure Allure CLI in Jenkins to enable this
-                        // if (fileExists('allure-results')) {
-                        //     allure([
-                        //         includeProperties: false,
-                        //         jdk: '',
-                        //         properties: [],
-                        //         reportBuildPolicy: 'ALWAYS',
-                        //         results: [[path: 'allure-results']]
-                        //     ])
-                        // }
                     }
                 }
             }
