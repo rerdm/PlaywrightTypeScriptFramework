@@ -303,24 +303,7 @@ npm run test:prod:tc "@TC-10001"
 npm run test:prod:tag "@login"
 # Example: Runs the test(s) with the tag @login (TC can have multiple tags but only the single one is selected)
 
-
 ```
-
-
-#### Privacy & Git Handling
-
-- All files in `utils/registered-users/` are listed in `.gitignore`
-- **Please do not** commit user data to the repository
-- System is exclusively intended for local test documentation
-
-#### Benefits
-
-1. **Local User History:** Complete recording of all test registrations
-2. **Environment Tracking:** Track which users were created in which environment
-3. **Test Data Management:** Easy overview of available test users
-4. **Debugging Support:** Helps with tracking test problems
-5. **Excel Integration:** Optional Excel export for extended data analysis
-
 
 ## Useful Tools
 
@@ -524,7 +507,6 @@ GitHub Actions is a CI/CD platform that automates building, testing, and deployi
 
 #### Push and Pull
 - Push from local feature branch to `main` or `master` branch
-- Pull requests from local feature branch to `main` or `master` branch  
 - Manually via GitHub Actions UI
 
 ### Gh CI Tool - Workflow_dispatch
@@ -574,11 +556,11 @@ List available workflows:
 gh workflow list
 ```
 
-Trigger a workflow by name or file:
+Trigger a workflow by file:
 ```bash
 gh workflow run <workflow_file.yml>
 ```
-Or, if you know the workflow name:
+Or, by name:
 ```bash
 gh workflow run "<workflow name>"
 ```
@@ -650,7 +632,7 @@ parameters {
     
     string(name: 'paramter_for_test', 
            defaultValue: '', 
-           description: 'Playwright test parameter (e.g., login.spec.ts or @TC-10001)', 
+           description: 'Playwright test parameter (e.g., login.spec.ts or --grep @TC-10001, login.spec:22 )', 
            trim: true)
     
     choice(name: 'Environment', 
@@ -672,7 +654,7 @@ parameters {
 | Parameter | Example Values | Description |
 |-----------|---------------|-------------|
 | `BRANCH_NAME` | `main`, `feature/login-tests` | Git branch to checkout and test |
-| `paramter_for_test` | `login.spec.ts`, `@TC-10001`, `@smoke` | Specific test file, test case ID, or tag |
+| `paramter_for_test` | `login.spec.ts`, `login.spec:22`, `--grep @SMOKE` | Specific test file, test case ID, or tag |
 | `Environment` | `prod` | Environment configuration (currently only prod supported) |
 | `Headles` | `true`/`false` | Run browsers in headless mode (faster) or headed mode (visible) |
 | `SEND_EMAIL` | `true`/`false` | Send email notifications with test results |
@@ -684,12 +666,12 @@ parameters {
 - Result: `npx playwright test login.spec.ts`
 
 **Example 2: Run specific test case**
-- `paramter_for_test`: `@TC-10001`
-- Result: `npx playwright test @TC-10001`
+- `paramter_for_test`: `login.spec.ts:22`
+- Result: `npx playwright test login.spec.ts:22` (Runs test at line 22)
 
 **Example 3: Run test suite with tag**
-- `paramter_for_test`: `@smoke`
-- Result: `npx playwright test @smoke`
+- `paramter_for_test`: `--grep @SMOKE`
+- Result: `npx playwright test --grep @SMOKE`
 
 #### Jenkins Pipeline Stages
 
