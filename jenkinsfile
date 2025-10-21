@@ -51,39 +51,49 @@ pipeline {
                 script {
                     def npmCommand = "npx playwright test ${params.paramter_for_test}"
                     echo "Running command: ${npmCommand}"
-                    try {
-                        bat "${npmCommand}"
-                    } catch (err) {
-                        echo "[ERROR] Playwright Tests failed: ${err}"
-                        currentBuild.result = 'UNSTABLE'  // Changed from FAILURE to UNSTABLE to continue with reports
+                    
+                    // Always continue to post actions, even if tests fail
+                    def testResult = bat(script: "${npmCommand}", returnStatus: true)
+                    
+                    if (testResult != 0) {
+                        echo "[WARNING] Some Playwright tests failed (exit code: ${testResult})"
+                        currentBuild.result = 'UNSTABLE'
+                    } else {
+                        echo "[SUCCESS] All Playwright tests passed"
                     }
                 }
             }
             post {
                 always {
-                    // Publish JUnit XML test results
-                    publishTestResults([
-                        testResultsPattern: 'test-results/junit-report.xml'
-                    ])
-                    
-                    // Publish Allure Reports (if Allure plugin is installed)
-                    allure([
-                        includeProperties: false,
-                        jdk: '',
-                        properties: [],
-                        reportBuildPolicy: 'ALWAYS',
-                        results: [[path: 'allure-results']]
-                    ])
-                    
-                    // Archive HTML report
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'playwright-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Playwright HTML Report'
-                    ])
+                    script {
+                        // Publish JUnit XML test results (only if file exists)
+                        if (fileExists('test-results/junit-report.xml')) {
+                            junit 'test-results/junit-report.xml'
+                        }
+                        
+                        // Archive HTML report (only if directory exists)
+                        if (fileExists('playwright-report')) {
+                            publishHTML([
+                                allowMissing: false,
+                                alwaysLinkToLastBuild: true,
+                                keepAll: true,
+                                reportDir: 'playwright-report',
+                                reportFiles: 'index.html',
+                                reportName: 'Playwright HTML Report'
+                            ])
+                        }
+                        
+                        // Publish Allure Reports (only if results exist)
+                        if (fileExists('allure-results')) {
+                            allure([
+                                includeProperties: false,
+                                jdk: '',
+                                properties: [],
+                                reportBuildPolicy: 'ALWAYS',
+                                results: [[path: 'allure-results']]
+                            ])
+                        }
+                    }
                 }
             }
         }
