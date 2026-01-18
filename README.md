@@ -594,6 +594,7 @@ Jenkins is an open-source automation server used to build, test, and deploy soft
    Navigate to **Manage Jenkins → Plugins → Available Plugins** and install:
    - `Git Parameter Plugin` (for branch selection)
    - `HTML Publisher Plugin` (for HTML reports)
+   - `Allure Jenkins Plugin` (for interactive Allure reports)
    - `Pipeline Plugin` (usually pre-installed)
 
 ##### 2. Create a New Pipeline Job from SCM
@@ -1023,72 +1024,10 @@ In GitHub Actions, the Playwright report is automatically uploaded as artifact:
 
 **Download:** Actions → Workflow Run → "Artifacts" → "playwright-report"
 
-### Custom HTML Test Report
-
-**Advanced Test Reports:** The framework generates custom HTML dashboards with visual ring diagrams and detailed test metrics in addition to standard Playwright reports
-
-
-![Custom HTML Test Report Example](images/Custom-Report-Basic-v01.jpg)
-
-Draft-Version
-
-**Features:**
-- Ring diagram for test summary (Passed/Failed/Skipped)
-- Consolidated reports for multiple test specifications
-- Responsive design with Tailwind CSS
-- Collapsible test details with screenshots
-- Animation and interactive elements
-
-#### Technical Implementation:
-
-**Components:**
-- `utils/ReportManager.ts`: Persistent storage of test data across multiple specifications
-- `utils/HtmlReportGenerator.ts`: Generates the visual dashboard with SVG ring charts
-- `utils/StepLogger.ts`: Coordinates report generation
-
-**Global Setup:** Configured in `playwright.config.ts` for consolidated reports:
-```typescript
-export default defineConfig({
-  globalTeardown: require.resolve('./utils/GlobalTeardown.ts'),
-  // ... additional configuration
-});
-```
-
-#### Local Usage:
-
-```bash
-# Run tests (automatically generates Custom HTML Report)
-npm run test
-
-# Open Custom HTML Report in browser (replace timestamp and environment with actual values)
-start test-reports/YYYY-MM-DD_HH-MM-SS_Environment.html
-```
 
 **Report Storage Location:** `test-reports/YYYY-MM-DD_HH-MM-SS_Environment.html`
 
 #### CI/CD Pipeline:
-
-Custom HTML Reports are automatically uploaded as GitHub Actions Artifacts:
-
-```yaml
-    - name: Upload Custom HTML Test Report
-      if: ${{ !cancelled() }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: custom-html-test-report
-        path: test-reports/
-        retention-days: 30
-        if-no-files-found: warn
-```
-
-**Download:** Actions → Workflow Run → "Artifacts" → "custom-html-test-report" or "custom-html-test-report-registration"
-
-**Benefits:**
-- All test specifications consolidated in one report
-- Visual ring diagrams for quick overview  
-- Persistent storage as GitHub Artifacts for 30 days
-- Direct download and local viewing possible
-- Timestamped filenames with environment information for better organization
 
 ### ESLint HTML Report
 
@@ -1136,59 +1075,148 @@ These can be downloaded from the GitHub Actions page.
 
 ### Allure Report
 
-**Automatic Generation:** After each test run, Playwright can save results in Allure format, which are then processed into an HTML report.
+**Automatic Generation:** After each test run, Playwright automatically generates Allure results which are then processed into interactive HTML reports with rich visualizations, historical trends, and detailed test analytics.
 
-#### Configure Allure Report
+#### Prerequisites
 
-To activate Allure reports, adjust the `playwright.config.ts` file and install the necessary reporter package (`allure-playwright`). Example:
+**Required Dependencies:** Already installed in this project:
+- `allure-playwright`: Playwright reporter for Allure integration
+- `allure-commandline`: CLI tool for generating reports locally
 
-**Example Configuration (`playwright.config.ts`):**
+**Jenkins Requirements:**
+- `Allure Jenkins Plugin`: For displaying interactive reports in Jenkins UI
+- `Allure Commandline Tool`: Configured in Jenkins Tools for report generation
+
+#### Playwright Configuration
+
+Allure reporter is already configured in `playwright.config.ts`:
+
 ```typescript
-import { defineConfig, devices } from '@playwright/test';
-
-export default defineConfig({
-  reporter: [
-    ['allure-playwright']
-  ],
-  // Additional options like testDir, retries, etc.
-});
+reporter: [
+  ['html', { outputFolder: 'playwright-report', open: 'never' }], 
+  ['allure-playwright', { outputFolder: 'allure-results' }],  // ← Allure integration
+  ['junit', { outputFile: 'test-results/junit-report.xml' }],
+  ['line'],
+],
 ```
 
-**Important Fields:**
-- `reporter`: Adds the Allure reporter.
-- Results are stored in the `allure-results/` folder.
+**Configuration Details:**
+- **Output Folder:** `allure-results` contains JSON test data
+- **Automatic Generation:** Runs alongside other reporters
+- **Rich Data:** Includes screenshots, traces, and detailed test metadata
 
-**Additional adjustments** can be made in the same file, e.g. for traces, screenshots or video recordings.
+#### Jenkins Setup
 
-**File Path:**  
-`playwright.config.ts` (in project root)
+##### 1. Configure Allure Commandline Tool
 
-**Tip:**  
-After changes to the configuration, simply run the tests again to generate new Allure results.
+1. **Navigate to Jenkins Tools Configuration:**
+   - Go to: **Jenkins Dashboard → Manage Jenkins → Tools**
+   - Scroll to: **"Allure Commandline"**
 
-#### Local Usage:
+2. **Add Allure Commandline Installation:**
+   - Click: **"Add Allure Commandline"**
+   - **Name:** `allure` (important: exact name used in pipeline)
+   - **Install automatically:** ✅ Enable
+   - **Version:** Select latest available (e.g., 2.24.0 or higher)
+   - Click: **"Save"**
 
+3. **Verify Installation:**
+   - Tool will be automatically downloaded during first pipeline run
+   - Available globally across all Jenkins jobs
+
+##### 2. Pipeline Integration
+
+Allure reporting is automatically integrated into the Jenkins pipeline:
+
+```groovy
+// In jenkinsfile - Post Actions
+post {
+    always {
+        script {
+            // Publish Allure Report (with error handling)
+            if (fileExists('allure-results')) {
+                echo "Publishing Allure Report..."
+                try {
+                    allure([
+                        includeProperties: false,
+                        jdk: '',
+                        properties: [],
+                        reportBuildPolicy: 'ALWAYS',
+                        results: [[path: 'allure-results']],
+                        commandline: 'allure'  // References Jenkins tool name
+                    ])
+                } catch (Exception e) {
+                    echo "WARNING: Allure report generation failed"
+                    echo "Please ensure 'allure' tool is configured in Jenkins Tools"
+                    echo "Continuing build without Allure report..."
+                }
+            }
+        }
+    }
+}
+```
+
+**Pipeline Configuration Details:**
+- **reportBuildPolicy:** `ALWAYS` - Generate report for every build
+- **Error Handling:** Graceful fallback if Allure tool not configured
+- **Results Path:** Points to `allure-results` directory
+- **Tool Reference:** Uses `allure` tool name from Jenkins configuration
+
+#### Local Development
+
+**Available NPM Scripts:**
 ```bash
-# Run tests (automatically generates Allure results)
-npx playwright test
+# Run tests (automatically generates allure-results)
+npm run test
 
-# Generate Allure report
-allure generate allure-results --clean -o allure-report
+# Generate and open Allure report locally
+npm run allure:generate  # Creates allure-report folder
+npm run allure:open      # Opens report in browser
 
-# Open report in browser
-allure open allure-report
+# Or generate and serve in one step
+npm run allure:serve     # Generates and serves report
 ```
 
-**Report Storage Location:** `allure-report/index.html`
+**Local Report Location:** `allure-report/index.html`
 
-#### CI/CD Pipeline:
+#### Jenkins Build Results
 
-In GitHub Actions, the Allure report can be automatically uploaded as artifact:
+**After Successful Build, You'll See:**
+
+1. **Jenkins Build Dashboard:**
+   ```
+   Build #123
+   ├── Console Output
+   ├── Test Results (JUnit)
+   ├── Playwright HTML Report
+   ├── Allure Report ← 🎯 Interactive Allure Report
+   └── Build Artifacts
+   ```
+
+2. **Allure Report Features:**
+   - 📊 **Overview Dashboard:** Test statistics with trend graphs
+   - 🧪 **Test Suites:** Organized by test files and categories
+   - 📈 **Graphs:** Visual representation of test results
+   - 📋 **Test Details:** Step-by-step execution with screenshots
+   - 📊 **History Trend:** Compare results across multiple builds
+   - ⏱️ **Timeline:** Test execution timeline and duration analysis
+   - 🏷️ **Categories:** Failed tests categorized by error types
+
+3. **Interactive Features:**
+   - Click on any test to see detailed execution steps
+   - View screenshots and traces for failed tests
+   - Filter tests by status, tags, or execution time
+   - Historical comparison with previous builds
+
+#### GitHub Actions Integration
+
+For GitHub Actions workflows, Allure reports are uploaded as artifacts:
 
 ```yaml
 - name: Generate Allure Report
   if: always()
-  run: allure generate allure-results --clean -o allure-report
+  run: |
+    npm run allure:generate
 
 - name: Upload Allure Report
   if: always()
@@ -1199,19 +1227,27 @@ In GitHub Actions, the Allure report can be automatically uploaded as artifact:
     retention-days: 30
 ```
 
+**Download:** Actions → Workflow Run → "Artifacts" → "allure-report"
+
+#### Benefits of Allure Integration
+
+- ✅ **Detailed Test Information:** Step-by-step execution details
+- ✅ **Multiple Export Formats:** PDF, CSV, and other formats
+- ✅ **Jenkins Integration:** Seamless viewing within Jenkins UI
+- ✅ **Screenshot Integration:** Visual evidence of test execution
+
 ## TODO - Improve the Framework
 
 ### Tests and Pages
 
-- [ ] Fix lint problems
-- [ ] Complete all pages
-- [ ] Complete all test specs
-- [ ] Generate 10 Test for every test specs
+- [ ] Reorganize readme file 
+- [ ]Fix lint problems
+- [ ] Create Xray integration for Jira
 
 
 ### Reporting
 
-- [ ] Fix reporting (Custom Report). At the moment, when a step fails, the test stops, and the Logger only shows all steps up to the failed step. The remaining steps are skipped and are not counted in the hrml report.
+- [ ] Delete custom reporter
 
 ### CI/CD
 
