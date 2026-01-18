@@ -104,6 +104,20 @@ pipeline {
                         } else {
                             echo "No playwright-report directory found"
                         }
+                        
+                        // Publish Allure Report
+                        if (fileExists('allure-results')) {
+                            echo "Publishing Allure Report..."
+                            allure([
+                                includeProperties: false,
+                                jdk: '',
+                                properties: [],
+                                reportBuildPolicy: 'ALWAYS',
+                                results: [[path: 'allure-results']]
+                            ])
+                        } else {
+                            echo "No allure-results directory found"
+                        }
                     }
                 }
             }
