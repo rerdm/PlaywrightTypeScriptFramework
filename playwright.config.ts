@@ -40,7 +40,7 @@ export default defineConfig({
     ['allure-playwright', { outputFolder: 'allure-results' }], 
     ['junit', { outputFile: 'test-results/junit-report.xml' }],  // Added JUnit XML reporter for Jenkins
     ['line'],
-    ['./utils/MyReporter']
+    //['./utils/MyReporter']
   ],
 
   use: {

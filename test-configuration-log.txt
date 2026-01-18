@@ -3,6 +3,6 @@
 | Retries: 0                                       |
 | Environment: prod                                |
 | Base URL: https://rerd.de/testing-website/       |
-| Global Timeout: 60000ms                          |
+| Global Timeout: 30000ms                          |
 |                                                  |
 +--------------------------------------------------+
