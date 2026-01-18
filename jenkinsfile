@@ -105,16 +105,23 @@ pipeline {
                             echo "No playwright-report directory found"
                         }
                         
-                        // Publish Allure Report
+                        // Publish Allure Report (only if allure commandline tool is configured)
                         if (fileExists('allure-results')) {
                             echo "Publishing Allure Report..."
-                            allure([
-                                includeProperties: false,
-                                jdk: '',
-                                properties: [],
-                                reportBuildPolicy: 'ALWAYS',
-                                results: [[path: 'allure-results']]
-                            ])
+                            try {
+                                allure([
+                                    includeProperties: false,
+                                    jdk: '',
+                                    properties: [],
+                                    reportBuildPolicy: 'ALWAYS',
+                                    results: [[path: 'allure-results']],
+                                    commandline: 'allure'
+                                ])
+                            } catch (Exception e) {
+                                echo "WARNING: Allure report generation failed. Please configure 'allure' tool in Jenkins Tools."
+                                echo "Error: ${e.getMessage()}"
+                                echo "Continuing build without Allure report..."
+                            }
                         } else {
                             echo "No allure-results directory found"
                         }
