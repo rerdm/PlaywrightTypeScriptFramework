@@ -1242,7 +1242,6 @@ For GitHub Actions workflows, Allure reports are uploaded as artifacts:
 
 - [ ] Reorganize readme file 
 - [ ] Fix lint problems
-- [ ] Create Xray integration for Jira
 
 
 ### Reporting
@@ -1252,5 +1251,6 @@ For GitHub Actions workflows, Allure reports are uploaded as artifacts:
 ### CI/CD
 
 - [x] Adding Workflow_dipatch to execute playwright.yml per ci tool
+- [ ] Create Xray integration for Jira
 - [ ] Generate reusable Docker image and use it in the pipeline
 
