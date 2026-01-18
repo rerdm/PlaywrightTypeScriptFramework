@@ -1241,7 +1241,7 @@ For GitHub Actions workflows, Allure reports are uploaded as artifacts:
 ### Tests and Pages
 
 - [ ] Reorganize readme file 
-- [ ]Fix lint problems
+- [ ] Fix lint problems
 - [ ] Create Xray integration for Jira
 
 
