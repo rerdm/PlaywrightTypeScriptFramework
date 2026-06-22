@@ -10,6 +10,7 @@
     "allure:generate": "allure generate allure-results -o allure-report --clean",
     "allure:open": "allure open allure-report",
     "allure:serve": "allure serve allure-results",
+    "allure:excel": "ts-node utils/allure-excel-reporter.ts",
     "playwright:report": "playwright show-report",
     "test": "playwright test",
     "test:prod": "cross-env ENV=local playwright test",
