@@ -4,9 +4,13 @@ import * as XLSX from 'xlsx';
 
 // This interface models only the fields we need from every Allure result JSON file.
 interface AllureResultFile {
+  uuid?: string;
+  historyId?: string;
   name?: string;
   fullName?: string;
   status?: string;
+  start?: number;
+  stop?: number;
   statusDetails?: {
     message?: string;
     trace?: string;
@@ -18,6 +22,13 @@ interface ExcelRow {
   testCaseName: string;
   stackTrace: string;
   extractedError: string;
+}
+
+// This interface tracks one candidate attempt before retry de-duplication.
+interface RetryCandidate {
+  key: string;
+  orderValue: number;
+  row: ExcelRow;
 }
 
 // Resolve the repository root from the current execution directory.
@@ -149,13 +160,51 @@ function isIncludedInReport(result: AllureResultFile): boolean {
   return true;
 }
 
+// Build a stable grouping key so all retries of the same test are grouped together.
+function buildRetryGroupingKey(result: AllureResultFile, testCaseName: string): string {
+  // Prefer Allure historyId because it is designed to identify the same test across retries.
+  if (result.historyId && result.historyId.trim().length > 0) {
+    return `historyId:${result.historyId}`;
+  }
+
+  // Fallback to fullName when historyId is not available.
+  if (result.fullName && result.fullName.trim().length > 0) {
+    return `fullName:${result.fullName}`;
+  }
+
+  // Last fallback groups by visible test case name.
+  return `name:${testCaseName}`;
+}
+
+// Calculate an order number to keep only the latest attempt per test case.
+function buildAttemptOrderValue(result: AllureResultFile, filePath: string, index: number): number {
+  // Prefer stop time from Allure because it reflects the end of one attempt.
+  if (typeof result.stop === 'number' && Number.isFinite(result.stop)) {
+    return result.stop;
+  }
+
+  // Fallback to start time when stop is missing.
+  if (typeof result.start === 'number' && Number.isFinite(result.start)) {
+    return result.start;
+  }
+
+  // Fallback to filesystem modification time.
+  try {
+    const fileStat = fs.statSync(filePath);
+    return fileStat.mtimeMs;
+  } catch {
+    // Final fallback keeps deterministic ordering when metadata is unavailable.
+    return index;
+  }
+}
+
 // Convert result files into normalized rows for Excel.
 function buildExcelRows(resultFiles: string[]): ExcelRow[] {
-  // Accumulate all rows in one array.
-  const rows: ExcelRow[] = [];
+  // Track one candidate per retry group and keep only the latest attempt.
+  const latestCandidateByKey = new Map<string, RetryCandidate>();
 
   // Iterate through every discovered result file.
-  for (const resultFilePath of resultFiles) {
+  for (const [index, resultFilePath] of resultFiles.entries()) {
     // Parse one JSON file safely.
     const parsedResult = readResultFileSafely(resultFilePath);
 
@@ -177,16 +226,32 @@ function buildExcelRows(resultFiles: string[]): ExcelRow[] {
     const stackTrace = buildCompleteStackTrace(parsedResult);
     // Extract the requested error line that starts with "Error:".
     const extractedError = extractErrorLine(stackTrace);
+    // Build grouping key for retry handling.
+    const retryGroupingKey = buildRetryGroupingKey(parsedResult, testCaseName);
+    // Build order value to identify the latest attempt.
+    const orderValue = buildAttemptOrderValue(parsedResult, resultFilePath, index);
 
-    // Push one fully prepared row.
-    rows.push({
-      testCaseName,
-      stackTrace,
-      extractedError,
-    });
+    // Keep only the newest candidate for this test case.
+    const existingCandidate = latestCandidateByKey.get(retryGroupingKey);
+    if (!existingCandidate || orderValue >= existingCandidate.orderValue) {
+      latestCandidateByKey.set(retryGroupingKey, {
+        key: retryGroupingKey,
+        orderValue,
+        row: {
+          testCaseName,
+          stackTrace,
+          extractedError,
+        },
+      });
+    }
   }
 
-  // Return all transformed rows.
+  // Convert latest candidates to rows and sort for stable output in Excel.
+  const rows = Array.from(latestCandidateByKey.values())
+    .sort((left, right) => left.row.testCaseName.localeCompare(right.row.testCaseName))
+    .map((candidate) => candidate.row);
+
+  // Return one final result row per test case.
   return rows;
 }
 
