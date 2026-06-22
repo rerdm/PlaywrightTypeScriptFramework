@@ -12,7 +12,7 @@ test.describe('Login Tests', () => {
     await loginPage.goto();
   });
 
-  test('TEST-0001 should display login form elements @LOGIN-001', async ({ page }) => {
+  test('TEST-0001 should display login form elements @LOGIN', async ({ page }) => {
     // Verify all login form elements are present
 
     await loginPage.expectLoginFormVisible();
@@ -26,7 +26,7 @@ test.describe('Login Tests', () => {
     await expect(page.locator('h1')).toContainText('Welcome Back');
   });
 
-  test('TEST-0002 should successfully login with valid credentials @SMOKE', async ({ page }) => {
+  test('TEST-0002 should successfully login with valid credentials @LOGIN', async ({ page }) => {
     // Test data - you may need to adjust these credentials
     const validUsername = 'tester';
     const validPassword = 'passwort1234';
@@ -43,7 +43,7 @@ test.describe('Login Tests', () => {
     });
   });
 
-  test('TEST-0003 should show error for invalid credentials @SMOKE', async ({ page }) => {
+  test('TEST-0003 should show error for invalid credentials @LOGIN', async ({ page }) => {
     const invalidUsername = 'tester2';
     const invalidPassword = 'invalidpassword';
 
@@ -68,7 +68,7 @@ test.describe('Login Tests', () => {
     await expect(loginPage.passwordInput).toHaveAttribute('required');
   });
 
-  test('TEST-0005 should navigate to register page @Login-001', async ({ page }) => {
+  test('TEST-0005 should navigate to register page @LOGIN', async ({ page }) => {
     await test.step('Navigate to register page', async () => {
       await loginPage.goToRegister();
       await test.step('Verify register page', async () => {
@@ -78,7 +78,7 @@ test.describe('Login Tests', () => {
     });
   });
 
-  test('TEST-0006 should handle registration success popup @Login-005', async ({ page }) => {
+  test('TEST-0006 should handle registration success popup @LOGIN', async ({ page }) => {
     // Navigate to login page with registration success parameter
     await page.goto('/testing-website/public/login.php?registered=1');
     
@@ -93,7 +93,7 @@ test.describe('Login Tests', () => {
     await expect(page.locator('#successPopup')).not.toBeVisible();
   });
 
-  test('TEST-0007 should auto-close registration success popup @Login-006', async ({ page }) => {
+  test('TEST-0007 should auto-close registration success popup @LOGIN', async ({ page }) => {
     // Navigate to login page with registration success parameter
     await page.goto('/testing-website/public/login.php?registered=1');
     
