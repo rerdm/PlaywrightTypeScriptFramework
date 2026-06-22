@@ -18,8 +18,10 @@ pipeline {
                     // Clean previous test results
                     bat 'if exist "test-results" rmdir /s /q "test-results"'
                     bat 'if exist "allure-results" rmdir /s /q "allure-results"'
+                    bat 'if exist "allure-report" rmdir /s /q "allure-report"'
                     bat 'if exist "playwright-report" rmdir /s /q "playwright-report"'
                     bat 'mkdir test-results'
+                    bat 'mkdir allure-results'
                 }
             }
         }
@@ -70,6 +72,14 @@ pipeline {
             post {
                 always {
                     script {
+                        // Always provide a plain text summary file so downstream readFile steps never fail.
+                        def summaryContent = """Build: ${env.JOB_NAME} #${env.BUILD_NUMBER}
+Result: ${currentBuild.currentResult}
+Branch: ${params.BRANCH_NAME}
+Timestamp: ${new Date().format('yyyy-MM-dd HH:mm:ss')}
+"""
+                        writeFile file: 'test-results/results.txt', text: summaryContent
+
                         // Debug: List generated files
                         echo "=== Generated Test Files ==="
                         if (fileExists('test-results')) {
@@ -105,9 +115,12 @@ pipeline {
                             echo "No playwright-report directory found"
                         }
                         
-                        // Publish Allure Report (only if allure commandline tool is configured)
-                        if (fileExists('allure-results')) {
+                        // Publish Allure report when result JSON files exist.
+                        def hasAllureResults = (bat(script: 'if exist "allure-results\\*-result.json" (exit /b 0) else (exit /b 1)', returnStatus: true) == 0)
+                        if (hasAllureResults) {
                             echo "Publishing Allure Report..."
+
+                            // Primary path: Jenkins Allure plugin (requires configured commandline tool named 'allure').
                             try {
                                 allure([
                                     includeProperties: false,
@@ -118,12 +131,30 @@ pipeline {
                                     commandline: 'allure'
                                 ])
                             } catch (Exception e) {
-                                echo "WARNING: Allure report generation failed. Please configure 'allure' tool in Jenkins Tools."
+                                echo "WARNING: Jenkins Allure plugin path failed."
                                 echo "Error: ${e.getMessage()}"
-                                echo "Continuing build without Allure report..."
+                                echo "Trying CLI fallback: npx allure generate ..."
+
+                                // Fallback path: generate HTML report directly from npm dependency.
+                                def allureGenerateStatus = bat(script: 'npx allure generate allure-results -o allure-report --clean', returnStatus: true)
+                                if (allureGenerateStatus == 0 && fileExists('allure-report/index.html')) {
+                                    publishHTML([
+                                        allowMissing: false,
+                                        alwaysLinkToLastBuild: true,
+                                        keepAll: true,
+                                        reportDir: 'allure-report',
+                                        reportFiles: 'index.html',
+                                        reportName: 'Allure HTML Report (CLI Fallback)',
+                                        reportTitles: '',
+                                        includes: '**/*',
+                                        excludes: ''
+                                    ])
+                                } else {
+                                    echo "Allure CLI fallback failed or no allure-report/index.html was generated."
+                                }
                             }
                         } else {
-                            echo "No allure-results directory found"
+                            echo "No Allure result JSON files found (allure-results/*-result.json)."
                         }
                     }
                 }
