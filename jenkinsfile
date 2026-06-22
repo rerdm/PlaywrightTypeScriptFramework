@@ -17,11 +17,10 @@ pipeline {
                 script {
                     // Clean previous test results
                     bat 'if exist "test-results" rmdir /s /q "test-results"'
-                    bat 'if exist "allure-results" rmdir /s /q "allure-results"'
-                    bat 'if exist "allure-report" rmdir /s /q "allure-report"'
                     bat 'if exist "playwright-report" rmdir /s /q "playwright-report"'
+                    bat 'if exist "allure-results" rmdir /s /q "allure-results"'
+                    bat 'if exist "allure-excel-reports" rmdir /s /q "allure-excel-reports"'
                     bat 'mkdir test-results'
-                    bat 'mkdir allure-results'
                 }
             }
         }
@@ -115,47 +114,24 @@ Timestamp: ${new Date().format('yyyy-MM-dd HH:mm:ss')}
                             echo "No playwright-report directory found"
                         }
                         
-                        // Publish Allure report when result JSON files exist.
-                        def hasAllureResults = (bat(script: 'if exist "allure-results\\*-result.json" (exit /b 0) else (exit /b 1)', returnStatus: true) == 0)
-                        if (hasAllureResults) {
-                            echo "Publishing Allure Report..."
+                    }
+                }
+            }
+        }
+        stage('Generate Excel Report') {
+            steps {
+                script {
+                    // Generate Excel analysis from allure-results JSON files.
+                    def excelStatus = bat(script: 'npm run report:excel', returnStatus: true)
+                    if (excelStatus != 0) {
+                        echo "Excel report generation finished with non-zero exit code: ${excelStatus}"
+                    }
 
-                            // Primary path: Jenkins Allure plugin (requires configured commandline tool named 'allure').
-                            try {
-                                allure([
-                                    includeProperties: false,
-                                    jdk: '',
-                                    properties: [],
-                                    reportBuildPolicy: 'ALWAYS',
-                                    results: [[path: 'allure-results']],
-                                    commandline: 'allure'
-                                ])
-                            } catch (Exception e) {
-                                echo "WARNING: Jenkins Allure plugin path failed."
-                                echo "Error: ${e.getMessage()}"
-                                echo "Trying CLI fallback: npx allure generate ..."
-
-                                // Fallback path: generate HTML report directly from npm dependency.
-                                def allureGenerateStatus = bat(script: 'npx allure generate allure-results -o allure-report --clean', returnStatus: true)
-                                if (allureGenerateStatus == 0 && fileExists('allure-report/index.html')) {
-                                    publishHTML([
-                                        allowMissing: false,
-                                        alwaysLinkToLastBuild: true,
-                                        keepAll: true,
-                                        reportDir: 'allure-report',
-                                        reportFiles: 'index.html',
-                                        reportName: 'Allure HTML Report (CLI Fallback)',
-                                        reportTitles: '',
-                                        includes: '**/*',
-                                        excludes: ''
-                                    ])
-                                } else {
-                                    echo "Allure CLI fallback failed or no allure-report/index.html was generated."
-                                }
-                            }
-                        } else {
-                            echo "No Allure result JSON files found (allure-results/*-result.json)."
-                        }
+                    if (fileExists('allure-excel-reports')) {
+                        echo "=== Generated Excel Files ==="
+                        bat 'dir /b allure-excel-reports'
+                    } else {
+                        echo "No allure-excel-reports directory found"
                     }
                 }
             }
@@ -164,13 +140,26 @@ Timestamp: ${new Date().format('yyyy-MM-dd HH:mm:ss')}
             steps {
                 script {
                     def timestamp = new Date().format("yyyy-MM-dd_HH-mm")
-                    def zipFileName = "playwright-report_${timestamp}.zip"
+                    def playwrightZipFileName = "playwright-report_${timestamp}.zip"
+                    def excelZipFileName = "excel-report_${timestamp}.zip"
 
-                    echo "Creating ZIP file: ${zipFileName}"
-                    bat "powershell Compress-Archive -Path playwright-report/* -DestinationPath ${zipFileName}"
+                    if (fileExists('playwright-report')) {
+                        echo "Creating ZIP file: ${playwrightZipFileName}"
+                        bat "powershell Compress-Archive -Path playwright-report/* -DestinationPath ${playwrightZipFileName}"
+                    } else {
+                        echo "Skipping Playwright ZIP: playwright-report directory not found"
+                    }
 
-                    echo "Archiving ZIP file: ${zipFileName}"
-                    archiveArtifacts artifacts: zipFileName, allowEmptyArchive: false
+                    def hasExcelFiles = (bat(script: 'if exist "allure-excel-reports\\*.xlsx" (exit /b 0) else (exit /b 1)', returnStatus: true) == 0)
+                    if (hasExcelFiles) {
+                        echo "Creating ZIP file: ${excelZipFileName}"
+                        bat "powershell Compress-Archive -Path allure-excel-reports/* -DestinationPath ${excelZipFileName}"
+                    } else {
+                        echo "Skipping Excel ZIP: no .xlsx files found in allure-excel-reports"
+                    }
+
+                    echo "Archiving ZIP artifacts..."
+                    archiveArtifacts artifacts: "playwright-report_${timestamp}.zip,excel-report_${timestamp}.zip", allowEmptyArchive: true
                 }
             }
         }
