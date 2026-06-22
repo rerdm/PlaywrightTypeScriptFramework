@@ -280,14 +280,11 @@ function run(): void {
   // Write workbook to disk.
   XLSX.writeFile(workbook, outputFilePath);
 
-  // Cleanup source artifacts after report creation, as requested.
-  clearDirectoryContents(ALLURE_RESULTS_DIRECTORY);
-
   // Print completion summary for terminal users.
   console.log('Excel report generated successfully.');
   console.log(`Output: ${outputFilePath}`);
   console.log(`Rows written: ${rows.length}`);
-  console.log('allure-results folder has been cleaned.');
+  console.log('allure-results files were kept. No cleanup was performed.');
 }
 
 // Execute and surface fatal errors with non-zero exit code.
