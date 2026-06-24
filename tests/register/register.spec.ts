@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { RegisterPage } from '../pages/RegisterPage';
-import { LoginPage } from '../pages/LoginPage';
-import { NavigationPage } from '../pages/NavigationPage';
+import { RegisterPage } from '../../pages/RegisterPage';
+import { LoginPage } from '../../pages/LoginPage';
+import { NavigationPage } from '../../pages/NavigationPage';
 
 test.describe('Registration Tests', () => {
   let registerPage: RegisterPage;

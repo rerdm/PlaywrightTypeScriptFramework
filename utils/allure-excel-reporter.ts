@@ -15,10 +15,15 @@ interface AllureResultFile {
     message?: string;
     trace?: string;
   };
+  labels?: Array<{
+    name?: string;
+    value?: string;
+  }>;
 }
 
 // This interface represents one final Excel row.
 interface ExcelRow {
+  suiteName: string;
   testCaseName: string;
   stackTrace: string;
   extractedError: string;
@@ -115,6 +120,40 @@ function buildTestCaseName(result: AllureResultFile, fallbackFileName: string): 
 
   // Last fallback keeps traceability to the source file.
   return `Unknown test case (${fallbackFileName})`;
+}
+
+// Resolve a suite name like "tests/login/" from available Allure metadata.
+function buildSuiteName(result: AllureResultFile): string {
+  // Prefer the package label because it usually points to the spec file.
+  const packageLabelValue = result.labels?.find((label) => label.name === 'package')?.value;
+  // Fallback to suite label when package is missing.
+  const suiteLabelValue = result.labels?.find((label) => label.name === 'suite')?.value;
+  // Last fallback to fullName which contains file and line information.
+  const sourceValue = packageLabelValue || suiteLabelValue || result.fullName || '';
+
+  // Normalize to forward slashes and remove trailing line/column suffix.
+  const normalizedSource = sourceValue.replace(/\\/g, '/').replace(/:\d+:\d+$/, '').trim();
+
+  // Return a stable fallback when no source data is available.
+  if (normalizedSource.length === 0) {
+    return 'tests/unknown/';
+  }
+
+  // Derive the file segment regardless of whether a full path or filename is provided.
+  const fileName = path.basename(normalizedSource);
+  // Remove common TypeScript test suffixes to keep suite names compact.
+  const baseSuiteName = fileName
+    .replace(/\.spec\.(ts|js)$/i, '')
+    .replace(/\.(ts|js)$/i, '')
+    .trim();
+
+  // Build the final suite path in the requested style.
+  if (baseSuiteName.length > 0) {
+    return `tests/${baseSuiteName}/`;
+  }
+
+  // Fallback keeps the source for debugging if no clean base name was derived.
+  return `tests/${fileName || 'unknown'}/`;
 }
 
 // Return the complete stack trace text from statusDetails.
@@ -222,6 +261,8 @@ function buildExcelRows(resultFiles: string[]): ExcelRow[] {
     const fallbackFileName = path.basename(resultFilePath);
     // Build the final test case name.
     const testCaseName = buildTestCaseName(parsedResult, fallbackFileName);
+    // Build suite name for the first column.
+    const suiteName = buildSuiteName(parsedResult);
     // Build complete stack trace text.
     const stackTrace = buildCompleteStackTrace(parsedResult);
     // Extract the requested error line that starts with "Error:".
@@ -238,6 +279,7 @@ function buildExcelRows(resultFiles: string[]): ExcelRow[] {
         key: retryGroupingKey,
         orderValue,
         row: {
+          suiteName,
           testCaseName,
           stackTrace,
           extractedError,
@@ -248,7 +290,14 @@ function buildExcelRows(resultFiles: string[]): ExcelRow[] {
 
   // Convert latest candidates to rows and sort for stable output in Excel.
   const rows = Array.from(latestCandidateByKey.values())
-    .sort((left, right) => left.row.testCaseName.localeCompare(right.row.testCaseName))
+    .sort((left, right) => {
+      const suiteCompare = left.row.suiteName.localeCompare(right.row.suiteName);
+      if (suiteCompare !== 0) {
+        return suiteCompare;
+      }
+
+      return left.row.testCaseName.localeCompare(right.row.testCaseName);
+    })
     .map((candidate) => candidate.row);
 
   // Return one final result row per test case.
@@ -258,14 +307,14 @@ function buildExcelRows(resultFiles: string[]): ExcelRow[] {
 // Create a workbook with visual structure that is useful for analysis.
 function buildWorkbook(rows: ExcelRow[]): XLSX.WorkBook {
   // Start from a two-dimensional array to keep full control over header order.
-  const tableData: Array<[string, string, string]> = [
+  const tableData: Array<[string, string, string, string]> = [
     // Header row required by the user.
-    ['Test Case Name', 'Complete Stack Trace', 'Extracted Error (Error: ...)'],
+    ['Suite Name', 'Test Case Name', 'Complete Stack Trace', 'Extracted Error (Error: ...)'],
   ];
 
   // Append all data rows in the same fixed column order.
   for (const row of rows) {
-    tableData.push([row.testCaseName, row.stackTrace, row.extractedError]);
+    tableData.push([row.suiteName, row.testCaseName, row.stackTrace, row.extractedError]);
   }
 
   // Create worksheet from the table data.
@@ -273,13 +322,14 @@ function buildWorkbook(rows: ExcelRow[]): XLSX.WorkBook {
 
   // Tune column widths for readability in Excel.
   worksheet['!cols'] = [
+    { wch: 28 },
     { wch: 55 },
     { wch: 140 },
     { wch: 80 },
   ];
 
   // Add an auto-filter on all columns to support quick categorization.
-  worksheet['!autofilter'] = { ref: 'A1:C1' };
+  worksheet['!autofilter'] = { ref: 'A1:D1' };
 
   // Build a workbook container.
   const workbook = XLSX.utils.book_new();

@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/LoginPage';
-import { ShopPage } from '../pages/ShopPage';
-import { CartPage } from '../pages/CartPage';
-import { NavigationPage } from '../pages/NavigationPage';
+import { LoginPage } from '../../pages/LoginPage';
+import { ShopPage } from '../../pages/ShopPage';
+import { CartPage } from '../../pages/CartPage';
+import { NavigationPage } from '../../pages/NavigationPage';
 
 test.describe('E-Commerce Flow Tests', () => {
   let loginPage: LoginPage;
