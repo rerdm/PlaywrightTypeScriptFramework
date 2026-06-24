@@ -325,20 +325,17 @@ function run(): void {
   // Build report rows from parsed files.
   const rows = buildExcelRows(resultFiles);
 
-  // Keep the report informative even when no files are available.
+  // Skip report creation completely when no relevant failed entries were found.
   if (rows.length === 0) {
-    rows.push({
-      testCaseName: 'No non-passed tests found',
-      stackTrace: 'No failed/broken/skipped *-result.json entries were found in allure-results.',
-      extractedError: 'No "Error:" line found.',
-    });
+    console.log('No failed test cases found. Skipping Excel report generation.');
+    return;
   }
 
   // Build workbook from final rows.
   const workbook = buildWorkbook(rows);
 
   // Build output filename with timestamp.
-  const outputFileName = `allure-failure-analysis-${buildTimestamp()}.xlsx`;
+  const outputFileName = `Faild-Testcase-Excel-Report-${buildTimestamp()}.xlsx`;
   // Resolve absolute output path.
   const outputFilePath = path.join(EXCEL_REPORT_DIRECTORY, outputFileName);
 

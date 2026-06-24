@@ -141,7 +141,7 @@ Timestamp: ${new Date().format('yyyy-MM-dd HH:mm:ss')}
                 script {
                     def timestamp = new Date().format("yyyy-MM-dd_HH-mm")
                     def playwrightZipFileName = "playwright-report_${timestamp}.zip"
-                    def excelZipFileName = "excel-report_${timestamp}.zip"
+                    def excelZipFileName = "Faild-Testcase-Excel-Report_${timestamp}.zip"
 
                     if (fileExists('playwright-report')) {
                         echo "Creating ZIP file: ${playwrightZipFileName}"
@@ -159,7 +159,7 @@ Timestamp: ${new Date().format('yyyy-MM-dd HH:mm:ss')}
                     }
 
                     echo "Archiving ZIP artifacts..."
-                    archiveArtifacts artifacts: "playwright-report_${timestamp}.zip,excel-report_${timestamp}.zip", allowEmptyArchive: true
+                    archiveArtifacts artifacts: "${playwrightZipFileName},${excelZipFileName}", allowEmptyArchive: true
                 }
             }
         }
