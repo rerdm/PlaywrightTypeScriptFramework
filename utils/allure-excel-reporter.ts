@@ -25,6 +25,7 @@ interface AllureResultFile {
 interface ExcelRow {
   suiteName: string;
   testCaseName: string;
+  testIds: string;
   stackTrace: string;
   extractedError: string;
 }
@@ -42,6 +43,9 @@ const ROOT_DIRECTORY = process.cwd();
 const ALLURE_RESULTS_DIRECTORY = path.join(ROOT_DIRECTORY, 'allure-results');
 // Define the destination folder for generated Excel reports.
 const EXCEL_REPORT_DIRECTORY = path.join(ROOT_DIRECTORY, 'allure-excel-reports');
+
+// Define the TEST-ID extraction pattern here to make future customization easy.
+const TEST_ID_EXTRACTION_PATTERN = /\bTEST-\d{4}\b/gi;
 
 // Build a compact timestamp to keep report file names unique and sortable.
 function buildTimestamp(): string {
@@ -188,6 +192,54 @@ function extractErrorLine(stackTrace: string): string {
   return 'No "Error:" line found.';
 }
 
+// Build a fresh RegExp instance so each extraction call starts with a clean state.
+function buildTestIdExtractionPattern(): RegExp {
+  // Force global matching so all IDs in one text are captured.
+  const flags = TEST_ID_EXTRACTION_PATTERN.flags.includes('g')
+    ? TEST_ID_EXTRACTION_PATTERN.flags
+    : `${TEST_ID_EXTRACTION_PATTERN.flags}g`;
+
+  return new RegExp(TEST_ID_EXTRACTION_PATTERN.source, flags);
+}
+
+// Extract all TEST-ID values linked to one test case and return them as a comma-separated list.
+function extractTestIds(result: AllureResultFile, testCaseName: string): string {
+  // Collect multiple candidate sources because IDs may appear in title, full name, labels, or trace.
+  const candidateSources: string[] = [
+    testCaseName,
+    result.name || '',
+    result.fullName || '',
+    result.statusDetails?.message || '',
+    result.statusDetails?.trace || '',
+    ...(result.labels || []).map((label) => label.value || ''),
+  ];
+
+  // Keep IDs unique while preserving their discovery order.
+  const discoveredTestIds = new Set<string>();
+
+  for (const source of candidateSources) {
+    if (!source) {
+      continue;
+    }
+
+    const matches = source.match(buildTestIdExtractionPattern());
+    if (!matches) {
+      continue;
+    }
+
+    for (const match of matches) {
+      discoveredTestIds.add(match.toUpperCase());
+    }
+  }
+
+  // Return a stable fallback when no matching TEST-ID was found.
+  if (discoveredTestIds.size === 0) {
+    return 'No TEST-ID found.';
+  }
+
+  return Array.from(discoveredTestIds).join(', ');
+}
+
 // Keep only result entries that are useful for failure analysis.
 function isIncludedInReport(result: AllureResultFile): boolean {
   // Exclude passed tests explicitly as requested.
@@ -261,6 +313,8 @@ function buildExcelRows(resultFiles: string[]): ExcelRow[] {
     const fallbackFileName = path.basename(resultFilePath);
     // Build the final test case name.
     const testCaseName = buildTestCaseName(parsedResult, fallbackFileName);
+    // Extract one or multiple TEST-ID values for the dedicated Excel column.
+    const testIds = extractTestIds(parsedResult, testCaseName);
     // Build suite name for the first column.
     const suiteName = buildSuiteName(parsedResult);
     // Build complete stack trace text.
@@ -281,6 +335,7 @@ function buildExcelRows(resultFiles: string[]): ExcelRow[] {
         row: {
           suiteName,
           testCaseName,
+          testIds,
           stackTrace,
           extractedError,
         },
@@ -307,14 +362,14 @@ function buildExcelRows(resultFiles: string[]): ExcelRow[] {
 // Create a workbook with visual structure that is useful for analysis.
 function buildWorkbook(rows: ExcelRow[]): XLSX.WorkBook {
   // Start from a two-dimensional array to keep full control over header order.
-  const tableData: Array<[string, string, string, string]> = [
+  const tableData: Array<[string, string, string, string, string]> = [
     // Header row required by the user.
-    ['Suite Name', 'Test Case Name', 'Complete Stack Trace', 'Extracted Error (Error: ...)'],
+    ['Suite Name', 'Test Case Name', 'Test IDs', 'Complete Stack Trace', 'Extracted Error (Error: ...)'],
   ];
 
   // Append all data rows in the same fixed column order.
   for (const row of rows) {
-    tableData.push([row.suiteName, row.testCaseName, row.stackTrace, row.extractedError]);
+    tableData.push([row.suiteName, row.testCaseName, row.testIds, row.stackTrace, row.extractedError]);
   }
 
   // Create worksheet from the table data.
@@ -324,12 +379,13 @@ function buildWorkbook(rows: ExcelRow[]): XLSX.WorkBook {
   worksheet['!cols'] = [
     { wch: 28 },
     { wch: 55 },
+    { wch: 35 },
     { wch: 140 },
     { wch: 80 },
   ];
 
   // Add an auto-filter on all columns to support quick categorization.
-  worksheet['!autofilter'] = { ref: 'A1:D1' };
+  worksheet['!autofilter'] = { ref: 'A1:E1' };
 
   // Build a workbook container.
   const workbook = XLSX.utils.book_new();
